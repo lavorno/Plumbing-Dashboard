@@ -181,9 +181,9 @@
                            step="5"
                            class="custom-slider"
                            oninput="handleSliderInput(this, 'efficiency_rate', value => value / 100)"
-                           value="60">
+                           value="0">
                 </div>
-                <div class="param-display">60%</div>
+                <div class="param-display">0%</div>
             </div>
         </div>
         <div class="param-item">
@@ -197,9 +197,9 @@
                            step="5"
                            class="custom-slider"
                            oninput="handleSliderInput(this, 'profit_margin_multiplier', value => (100 - value) / 100)"
-                           value="60">
+                           value="0">
                 </div>
-                <div class="param-display">60%</div>
+                <div class="param-display">0%</div>
             </div>
         </div>
         <div class="param-item">
@@ -215,7 +215,9 @@
                            oninput="handleHourlyRateSlider(this)"
                            value="285">
                 </div>
-                <div class="param-display">$285</div>
+                <div class="param-display-container">
+                    <div class="param-display">$285</div>
+                </div>
             </div>
         </div>
         <div class="save-button-container">
@@ -328,8 +330,8 @@
 /* Business parameters sidebar styles */
 .business-parameters-sidebar {
     position: fixed;
-    right: calc(((100vw - 1320px) / 2) - 247px);
-    top: 82px;
+    right: calc(((100vw - 1320px) / 2) - 265px);
+    top: 80px;
     background: rgba(17, 24, 39, 0.95);
     backdrop-filter: blur(8px);
     border: 1px solid rgba(167, 139, 250, 0.2);
@@ -784,11 +786,223 @@
     color: #a78bfa;
     font-weight: 500;
 }
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+
+.rate-container.shake {
+    animation: shake 0.5s ease-in-out;
+}
+
+.param-display-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
 </style>
 
 <script>
     // State management for hourly rate lock
-    let isHourlyRateLocked = false;
+    let isHourlyRateLocked = localStorage.getItem('isHourlyRateLocked') === 'true';
+
+    // Lock button functionality
+    const rateLockBtn = document.getElementById('rate-lock-btn');
+    rateLockBtn.addEventListener('click', function() {
+        toggleRateLock(this);
+    });
+
+    function updateLockButtonState() {
+        const lockButton = document.getElementById('rate-lock-btn');
+        if (isHourlyRateLocked) {
+            lockButton.innerHTML = '<i class="fas fa-lock"></i>';
+            lockButton.classList.add('locked');
+        } else {
+            lockButton.innerHTML = '<i class="fas fa-lock-open"></i>';
+            lockButton.classList.remove('locked');
+        }
+    }
+
+    // Initialize lock state
+    document.addEventListener('DOMContentLoaded', () => {
+        restoreStateFromLocalStorage();
+        updateLockButtonState();
+        updateDashboard();
+    });
+
+    function saveStateToLocalStorage() {
+        localStorage.setItem('isHourlyRateLocked', isHourlyRateLocked);
+        localStorage.setItem('hourlyRate', document.getElementById('hourly-rate').textContent);
+        localStorage.setItem('efficiencyRate', document.getElementById('efficiency-rate-input').value);
+        localStorage.setItem('profitMargin', document.getElementById('profit-margin-input').value);
+    }
+
+    function restoreStateFromLocalStorage() {
+        const savedHourlyRate = localStorage.getItem('hourlyRate');
+        const savedEfficiencyRate = localStorage.getItem('efficiencyRate');
+        const savedProfitMargin = localStorage.getItem('profitMargin');
+
+        if (savedHourlyRate) {
+            const hourlyRateSlider = document.getElementById('hourlyRateSlider');
+            const hourlyRateDisplay = hourlyRateSlider.parentElement.parentElement.querySelector('.param-display');
+            hourlyRateSlider.value = savedHourlyRate;
+            hourlyRateDisplay.textContent = '$' + savedHourlyRate;
+            document.getElementById('hourly-rate').textContent = savedHourlyRate;
+        }
+
+        if (savedEfficiencyRate) {
+            const efficiencyInput = document.getElementById('efficiency-rate-input');
+            efficiencyInput.value = savedEfficiencyRate;
+            if (efficiencyInput.nextElementSibling) {
+                efficiencyInput.nextElementSibling.textContent = savedEfficiencyRate + '%';
+            }
+        }
+
+        if (savedProfitMargin) {
+            const profitMarginInput = document.getElementById('profit-margin-input');
+            const profitDisplay = profitMarginInput.parentElement.parentElement.querySelector('.param-display');
+            profitMarginInput.value = savedProfitMargin;
+            if (profitDisplay) {
+                profitDisplay.textContent = savedProfitMargin + '%';
+            }
+        }
+
+        updateLockButtonState();
+    }
+
+    function handleHourlyRateSlider(input) {
+        const display = input.parentElement.parentElement.querySelector('.param-display');
+        const hourlyRate = document.getElementById('hourly-rate');
+        
+        // If it's unlocked, lock it when slider is moved
+        if (!isHourlyRateLocked) {
+            isHourlyRateLocked = true;
+            updateLockButtonState();
+        }
+
+        // Allow manual changes since we're now locked
+        display.textContent = '$' + input.value;
+        hourlyRate.textContent = input.value;
+        
+        // Save state immediately when slider moves
+        saveStateToLocalStorage();
+        
+        // Update dashboard immediately for responsive feel
+        const currentLockState = isHourlyRateLocked;
+        updateDashboard();
+        isHourlyRateLocked = currentLockState;
+        updateLockButtonState();
+        
+        // Debounce the server update
+        clearTimeout(input.timeout);
+        input.timeout = setTimeout(() => {
+            fetch('/update_business_parameter', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    parameter: 'hourly_rate',
+                    value: parseFloat(input.value)
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const currentLockState = isHourlyRateLocked;
+                    updateDashboard();
+                    isHourlyRateLocked = currentLockState;
+                    updateLockButtonState();
+                    saveStateToLocalStorage();
+                }
+            });
+        }, 500);
+    }
+
+    function handleSliderInput(input, parameter, valueTransform) {
+        const display = input.parentElement.parentElement.querySelector('.param-display');
+        const value = input.value + '%';
+        display.textContent = value;
+        
+        // Save state immediately when slider moves
+        if (input.id === 'efficiency-rate-input') {
+            localStorage.setItem('efficiencyRate', input.value);
+            display.textContent = input.value + '%';
+        } else if (input.id === 'profit-margin-input') {
+            localStorage.setItem('profitMargin', input.value);
+        }
+        saveStateToLocalStorage();
+        
+        clearTimeout(input.timeout);
+        input.timeout = setTimeout(() => {
+            const transformedValue = valueTransform(parseFloat(input.value));
+            fetch('/update_business_parameter', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    parameter: parameter,
+                    value: transformedValue,
+                    respect_lock: true,
+                    preserve_lock_state: true
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const currentLockState = isHourlyRateLocked;
+                    if (isHourlyRateLocked) {
+                        const recommendedRateElement = document.getElementById('recommended-rate');
+                        if (data.metrics && data.metrics.recommended_rate) {
+                            recommendedRateElement.textContent = data.metrics.recommended_rate.replace('$', '');
+                            const recommendedRate = document.querySelector('.recommended-rate');
+                            recommendedRate.classList.remove('flash');
+                            void recommendedRate.offsetWidth;
+                            recommendedRate.classList.add('flash');
+                        }
+                    } else {
+                        updateDashboard();
+                    }
+                    isHourlyRateLocked = currentLockState;
+                    updateLockButtonState();
+                }
+            });
+        }, 300);
+    }
+
+    function toggleRateLock(button) {
+        const currentRate = document.getElementById('hourly-rate').textContent;
+        isHourlyRateLocked = !isHourlyRateLocked;
+        
+        const mainLockBtn = document.getElementById('rate-lock-btn');
+        const lockIcon = isHourlyRateLocked ? '<i class="fas fa-lock"></i>' : '<i class="fas fa-lock-open"></i>';
+        mainLockBtn.innerHTML = lockIcon;
+        mainLockBtn.classList.toggle('locked', isHourlyRateLocked);
+        
+        // Save state when lock is toggled
+        saveStateToLocalStorage();
+        
+        fetch('/toggle_hourly_rate_lock', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                action: isHourlyRateLocked ? 'lock' : 'unlock',
+                rate: isHourlyRateLocked ? parseFloat(currentRate) : null
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                updateDashboard();
+                saveStateToLocalStorage();
+            }
+        });
+    }
 
     function formatCurrency(amount) {
         return new Intl.NumberFormat('en-US', {
@@ -834,103 +1048,12 @@
         }, 600);
     }
 
-    // Lock button functionality
-    const rateLockBtn = document.getElementById('rate-lock-btn');
-    
-    rateLockBtn.addEventListener('click', function() {
-        const currentRate = document.getElementById('hourly-rate').textContent;
-        isHourlyRateLocked = !isHourlyRateLocked;
-        
-        // Update button appearance
-        this.innerHTML = isHourlyRateLocked ? 
-            '<i class="fas fa-lock"></i>' : 
-            '<i class="fas fa-lock-open"></i>';
-        this.classList.toggle('locked', isHourlyRateLocked);
-        
-        fetch('/toggle_hourly_rate_lock', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                action: isHourlyRateLocked ? 'lock' : 'unlock',
-                rate: isHourlyRateLocked ? parseFloat(currentRate) : null
-            })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                updateDashboard();
-            }
-        });
-    });
-
-    function handleSliderInput(input, parameter, valueTransform) {
-        const display = input.parentElement.parentElement.querySelector('.param-display');
-        const value = input.value + '%';
-        display.textContent = value;
-        
-        clearTimeout(input.timeout);
-        input.timeout = setTimeout(() => {
-            const transformedValue = valueTransform(parseFloat(input.value));
-            fetch('/update_business_parameter', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    parameter: parameter,
-                    value: transformedValue,
-                    respect_lock: true
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    updateDashboard();
-                    saveCurrentParameters();
-                }
-            });
-        }, 300);
-    }
-
-    function handleHourlyRateSlider(input) {
-        if (isHourlyRateLocked) {
-            // If locked, revert the slider to the locked value
-            const currentRate = document.getElementById('hourly-rate').textContent;
-            input.value = currentRate;
-            const display = input.parentElement.parentElement.querySelector('.param-display');
-            display.textContent = '$' + currentRate;
-            return;
-        }
-
-        const display = input.parentElement.parentElement.querySelector('.param-display');
-        display.textContent = '$' + input.value;
-        
-        clearTimeout(input.timeout);
-        input.timeout = setTimeout(() => {
-            fetch('/update_business_parameter', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    parameter: 'hourly_rate',
-                    value: parseFloat(input.value),
-                    respect_lock: true
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    updateDashboard();
-                    saveCurrentParameters();
-                }
-            });
-        }, 300);
-    }
-
     function updateDashboard() {
+        // Store current lock state before update
+        const currentLockState = isHourlyRateLocked;
+        const currentRate = isHourlyRateLocked ? document.getElementById('hourly-rate').textContent : null;
+        const hourlyRateSlider = document.getElementById('hourlyRateSlider');
+        
         Promise.all([
             fetch('/get_dashboard_data'),
             fetch('/get_trucks')
@@ -945,9 +1068,30 @@
             const hourlyRate = document.getElementById('hourly-rate');
             const costPerHour = document.getElementById('cost-per-hour');
             const totalExpensesElement = document.getElementById('total-expenses');
+            const recommendedRateElement = document.getElementById('recommended-rate');
 
+            // Update the recommended rate display
+            recommendedRateElement.textContent = dashData.metrics.recommended_rate.replace('$', '');
+
+            // Update hourly rate based on lock state
+            if (!isHourlyRateLocked) {
+                // When unlocked, use recommended rate
+                const recommendedRate = dashData.metrics.recommended_rate.replace('$', '');
+                hourlyRate.textContent = recommendedRate;
+                if (hourlyRateSlider) {
+                    hourlyRateSlider.value = recommendedRate;
+                    const display = hourlyRateSlider.parentElement.parentElement.querySelector('.param-display');
+                    if (display) {
+                        display.textContent = '$' + recommendedRate;
+                    }
+                }
+            } else if (currentRate) {
+                // When locked, keep the current rate
+                hourlyRate.textContent = currentRate;
+            }
+
+            // Update other metrics
             animateValue(billableHours, dashData.metrics.billable_hours);
-            animateValue(hourlyRate, dashData.metrics.hourly_rate);
             animateValue(costPerHour, dashData.metrics.cost_per_hour);
             animateValue(totalExpensesElement, dashData.metrics.total_expenses.replace('$', ''));
 
@@ -1074,7 +1218,7 @@
                 // Calculate revenue and profit
                 const monthlyHours = weeklyHours * 4;
                 const monthlyBillableHours = monthlyHours * dashData.business_parameters.efficiency_rate;
-                const revenue = monthlyBillableHours * parseFloat(dashData.metrics.hourly_rate);
+                const revenue = monthlyBillableHours * parseFloat(hourlyRate.textContent);
                 const profit = revenue - totalTruckMonthlyExpenses;
 
                 trucksOverview.innerHTML += `
@@ -1128,11 +1272,23 @@
             
             const efficiencyInput = document.getElementById('efficiency-rate-input');
             const profitMarginInput = document.getElementById('profit-margin-input');
-            const hourlyRateSlider = document.getElementById('hourlyRateSlider');
             
-            if (efficiencyInput && efficiencyInput.nextElementSibling) {
-                efficiencyInput.value = efficiencyRate;
-                efficiencyInput.nextElementSibling.textContent = efficiencyRate + '%';
+            // Only update if the values are different from the saved ones
+            const savedEfficiencyRate = localStorage.getItem('efficiencyRate');
+            if (efficiencyInput) {
+                if (savedEfficiencyRate) {
+                    efficiencyInput.value = savedEfficiencyRate;
+                    const display = efficiencyInput.parentElement.parentElement.querySelector('.param-display');
+                    if (display) {
+                        display.textContent = savedEfficiencyRate + '%';
+                    }
+                } else {
+                    efficiencyInput.value = efficiencyRate;
+                    const display = efficiencyInput.parentElement.parentElement.querySelector('.param-display');
+                    if (display) {
+                        display.textContent = efficiencyRate + '%';
+                    }
+                }
             }
             
             if (profitMarginInput && profitMarginInput.nextElementSibling) {
@@ -1140,31 +1296,9 @@
                 profitMarginInput.nextElementSibling.textContent = profitMargin + '%';
             }
 
-            if (hourlyRateSlider && !isHourlyRateLocked) {
-                hourlyRateSlider.value = parseFloat(dashData.metrics.hourly_rate);
-                const display = hourlyRateSlider.parentElement.parentElement.querySelector('.param-display');
-                if (display) {
-                    display.textContent = '$' + dashData.metrics.hourly_rate;
-                }
-            }
-
-            const hourlyRateElement = document.getElementById('hourly-rate');
-            const recommendedRateElement = document.getElementById('recommended-rate');
-            const lockButton = document.getElementById('rate-lock-btn');
-            
-            // Update rates
-            hourlyRateElement.textContent = dashData.metrics.hourly_rate.replace('$', '');
-            recommendedRateElement.textContent = dashData.metrics.recommended_rate.replace('$', '');
-            
-            // Update lock button state and sync with our local state
-            isHourlyRateLocked = dashData.metrics.is_rate_locked;
-            if (isHourlyRateLocked) {
-                lockButton.innerHTML = '<i class="fas fa-lock"></i>';
-                lockButton.classList.add('locked');
-            } else {
-                lockButton.innerHTML = '<i class="fas fa-lock-open"></i>';
-                lockButton.classList.remove('locked');
-            }
+            // Restore the lock state and update UI
+            isHourlyRateLocked = currentLockState;
+            updateLockButtonState();
         })
         .catch(error => {
             console.error('Error updating dashboard:', error);
@@ -1172,15 +1306,26 @@
     }
 
     function saveCurrentParameters() {
+        const efficiencyRate = document.getElementById('efficiency-rate-input').value;
+        const profitMargin = document.getElementById('profit-margin-input').value;
+        const hourlyRate = document.getElementById('hourlyRateSlider').value;
+
         const parameters = {
-            efficiency_rate: parseFloat(document.getElementById('efficiency-rate-input').value) / 100,
-            profit_margin_multiplier: (100 - parseFloat(document.getElementById('profit-margin-input').value)) / 100,
-            hourly_rate: parseFloat(document.getElementById('hourlyRateSlider').value)
+            efficiency_rate: parseFloat(efficiencyRate) / 100,
+            profit_margin_multiplier: (100 - parseFloat(profitMargin)) / 100,
+            hourly_rate: parseFloat(hourlyRate),
+            preserve_lock_state: true
         };
         
         const saveButton = document.getElementById('save-parameters-btn');
         const originalText = saveButton.innerHTML;
         saveButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+        
+        // Save to localStorage first
+        localStorage.setItem('isHourlyRateLocked', isHourlyRateLocked);
+        localStorage.setItem('hourlyRate', hourlyRate);
+        localStorage.setItem('efficiencyRate', efficiencyRate);
+        localStorage.setItem('profitMargin', profitMargin);
         
         fetch('/save_business_parameters', {
             method: 'POST',
@@ -1196,7 +1341,11 @@
                 setTimeout(() => {
                     saveButton.innerHTML = originalText;
                 }, 2000);
+                
+                const currentLockState = isHourlyRateLocked;
                 updateDashboard();
+                isHourlyRateLocked = currentLockState;
+                updateLockButtonState();
             } else {
                 console.error('Failed to save parameters:', data.error);
                 saveButton.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Error';
