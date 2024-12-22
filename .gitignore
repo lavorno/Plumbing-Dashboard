@@ -22,18 +22,19 @@ wheels/
 
 # Virtual Environment
 venv/
-env/
 ENV/
 
-# IDE specific files
-.idea/
+# IDE
 .vscode/
-*.swp
-*.swo
+.idea/
+
+# Database
+*.db
+*.sqlite3
 
 # Environment variables
 .env
 
 # Operating System
 .DS_Store
-Thumbs.db 
+Thumbs.db
