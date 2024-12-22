@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plumbing Business Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        :root {
+            --primary-purple: #8A2BE2;
+            --secondary-purple: #9370DB;
+            --dark-bg: #121212;
+            --darker-bg: #0a0a0a;
+            --card-bg: #1e1e1e;
+            --text-primary: #ffffff;
+            --text-secondary: #ffffff;
+            --border-color: #333333;
+        }
+
+        body {
+            background-color: var(--dark-bg);
+            color: var(--text-primary);
+        }
+
+        .navbar {
+            background: linear-gradient(135deg, var(--primary-purple), var(--secondary-purple)) !important;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+        }
+
+        .table {
+            color: var(--text-primary);
+        }
+
+        .table-dark {
+            background-color: transparent;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-purple);
+            border-color: var(--primary-purple);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--secondary-purple);
+            border-color: var(--secondary-purple);
+        }
+
+        .nav-link {
+            color: rgba(255, 255, 255, 0.8) !important;
+        }
+
+        .nav-link:hover {
+            color: white !important;
+        }
+
+        .nav-link.active {
+            color: white !important;
+            font-weight: bold;
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--darker-bg);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary-purple);
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--secondary-purple);
+        }
+
+        .debug-icon {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(167, 139, 250, 0.1);
+            color: #a78bfa;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(167, 139, 250, 0.2);
+            font-size: 1.2rem;
+        }
+
+        .debug-icon:hover {
+            background: rgba(167, 139, 250, 0.2);
+            color: #c4b5fd;
+            transform: scale(1.1);
+        }
+
+        .toast-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 9999;
+        }
+
+        .notification {
+            background: rgba(167, 139, 250, 0.1);
+            border: 1px solid rgba(167, 139, 250, 0.2);
+            border-radius: 8px;
+            padding: 12px 24px;
+            color: #a78bfa;
+            margin: 8px;
+            font-size: 0.9rem;
+            backdrop-filter: blur(8px);
+            transform: translateX(120%);
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .notification.success {
+            background: rgba(16, 185, 129, 0.1);
+            border-color: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+        }
+
+        .notification.error {
+            background: rgba(239, 68, 68, 0.1);
+            border-color: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+            opacity: 1;
+        }
+
+        .notification i {
+            font-size: 1.1rem;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand text-purple" href="/">
+                <i class="fas fa-tools fa-lg me-2"></i>
+                <span class="fw-bold">Plumbing Dashboard</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint == 'settings' %}active{% endif %}" href="/settings">
+                            <i class="fas fa-dollar-sign"></i> Monthly Expenses
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint == 'business_parameters' %}active{% endif %}" href="/business_parameters">
+                            <i class="fas fa-cogs"></i> Business Parameters
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint == 'customers' %}active{% endif %}" href="/customers">
+                            <i class="fas fa-users"></i> Customers
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint == 'employees' %}active{% endif %}" href="/employees">
+                            <i class="fas fa-hard-hat"></i> Employees
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint == 'trucks' %}active{% endif %}" href="/trucks">
+                            <i class="fas fa-truck"></i> Trucks
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Toast Notification Container -->
+    <div class="toast-container">
+        <!-- Notifications will be added here -->
+    </div>
+
+    {% block content %}{% endblock %}
+
+    <!-- Debug Icon -->
+    <a href="/debug" class="debug-icon" title="Debug Panel">
+        <i class="fas fa-bug"></i>
+    </a>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        function showNotification(message, type = 'success') {
+            const container = document.querySelector('.toast-container');
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            
+            // Add appropriate icon based on type
+            let icon = 'check-circle';
+            if (type === 'error') icon = 'exclamation-circle';
+            
+            notification.innerHTML = `
+                <i class="fas fa-${icon}"></i>
+                ${message}
+            `;
+            
+            container.appendChild(notification);
+            
+            // Trigger animation
+            setTimeout(() => {
+                notification.classList.add('show');
+            }, 10);
+            
+            // Remove notification after delay
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => {
+                    notification.remove();
+                }, 300);
+            }, 3000);
+        }
+    </script>
+
+    {% block scripts %}{% endblock %}
+</body>
+</html> 

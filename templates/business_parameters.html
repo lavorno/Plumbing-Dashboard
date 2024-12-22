@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container my-4">
+    <div class="card bg-dark text-white">
+        <div class="card-body">
+            <h5 class="card-title text-purple mb-4">
+                <i class="fas fa-cogs"></i> Business Parameters
+            </h5>
+            
+            <div class="expense-group">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label class="form-label">Efficiency Rate (%)</label>
+                            <input type="number" class="form-control" id="efficiency_rate" 
+                                   min="0" max="100" step="1" required>
+                            <small class="text-muted">Percentage of available hours that are billable</small>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label class="form-label">Profit Margin (%)</label>
+                            <input type="number" class="form-control" id="profit_margin_multiplier" 
+                                   min="0" max="100" step="1" required>
+                            <small class="text-muted">Target profit margin percentage</small>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label class="form-label">Hourly Rate ($)</label>
+                            <input type="number" class="form-control" id="hourly_rate" 
+                                   min="0" step="0.01" required>
+                            <small class="text-muted">Base hourly rate for services</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.expense-group {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    padding: 20px;
+    border: 1px solid rgba(167, 139, 250, 0.2);
+}
+
+.expense-group:hover {
+    border-color: rgba(167, 139, 250, 0.5);
+}
+
+.form-control {
+    background: var(--dark-bg) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    color: white !important;
+}
+
+.form-control:focus {
+    border-color: #a78bfa !important;
+    box-shadow: 0 0 0 2px rgba(167, 139, 250, 0.25) !important;
+}
+
+.form-label {
+    color: #a78bfa;
+    font-weight: 500;
+}
+</style>
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    fetch('/get_business_parameters')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success && data.parameters) {
+                const params = data.parameters;
+                document.getElementById('efficiency_rate').value = (params.efficiency_rate * 100).toFixed(0);
+                document.getElementById('profit_margin_multiplier').value = (params.profit_margin_multiplier * 100).toFixed(0);
+                document.getElementById('hourly_rate').value = params.hourly_rate.toFixed(2);
+            }
+        })
+        .catch(error => console.error('Error loading parameters:', error));
+});
+
+// Add event listeners for input changes
+const inputs = ['efficiency_rate', 'profit_margin_multiplier', 'hourly_rate'];
+inputs.forEach(id => {
+    const input = document.getElementById(id);
+    if (input) {
+        input.addEventListener('change', function() {
+            const parameters = {
+                efficiency_rate: parseFloat(document.getElementById('efficiency_rate').value) / 100,
+                profit_margin_multiplier: parseFloat(document.getElementById('profit_margin_multiplier').value) / 100,
+                hourly_rate: parseFloat(document.getElementById('hourly_rate').value)
+            };
+            saveBusinessParameters(parameters);
+        });
+    }
+});
+</script>
+{% endblock %}
+{% endblock %} 

@@ -1,0 +1,18 @@
+{
+    "overhead_costs": {
+        "employee_wages": 8800.0,
+        "insurance": 400,
+        "marketing": 1000,
+        "rent": 2000,
+        "tools_equipment": 500,
+        "utilities": 500,
+        "pierce_brothers_truck_expenses": 1500.0,
+        "vehicle_expenses": 1500.0
+    },
+    "business_parameters": {
+        "efficiency_rate": 0.9,
+        "profit_margin_multiplier": 0.1,
+        "hourly_rate": 450.0,
+        "locked_hourly_rate": null
+    }
+}

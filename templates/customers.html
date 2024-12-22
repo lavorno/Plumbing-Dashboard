@@ -1,0 +1,452 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container my-4">
+    <div class="card bg-dark text-white">
+        <div class="card-body">
+            <h5 class="card-title text-purple mb-4">
+                <i class="fas fa-users"></i> Customers
+            </h5>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div class="sort-buttons">
+                    <button type="button" class="btn btn-outline-primary btn-sm" onclick="sortCustomers('name')">
+                        <i class="fas fa-sort-alpha-down"></i> Sort by Name
+                    </button>
+                    <button type="button" class="btn btn-outline-primary btn-sm" onclick="sortCustomers('date')">
+                        <i class="fas fa-sort-numeric-down"></i> Sort by Date
+                    </button>
+                </div>
+                <button type="button" class="btn btn-primary" onclick="showAddCustomerModal()">
+                    <i class="fas fa-user-plus"></i> Add New Customer
+                </button>
+            </div>
+
+            <div class="expense-group">
+                <div class="table-responsive">
+                    <table class="table table-dark mb-0">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Phone</th>
+                                <th>Email</th>
+                                <th>Address</th>
+                                <th class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="customerTableBody">
+                            <!-- Customers will be added here dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add/Edit Customer Modal -->
+<div class="modal fade" id="customerModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content bg-dark text-white">
+            <div class="modal-header border-0">
+                <h5 class="modal-title text-purple">Add New Customer</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="customerForm">
+                <div class="modal-body">
+                    <div id="customerFormAlerts"></div>
+                    <input type="hidden" name="customer_id" id="customerId">
+                    
+                    <div class="expense-group mb-2">
+                        <label class="form-label">Name</label>
+                        <input type="text" class="form-control" name="name" id="customerName" required placeholder="Customer name">
+                    </div>
+                    <div class="expense-group mb-2">
+                        <label class="form-label">Address</label>
+                        <input type="text" class="form-control" name="address" id="customerAddress" required placeholder="Full address">
+                    </div>
+                    <div class="expense-group mb-2">
+                        <label class="form-label">Phone</label>
+                        <input type="tel" class="form-control" name="phone" id="customerPhone" required 
+                               pattern="[0-9-+\s()]*" 
+                               placeholder="Phone number"
+                               title="Please enter a valid phone number">
+                    </div>
+                    <div class="expense-group mb-2">
+                        <label class="form-label">Email</label>
+                        <input type="email" class="form-control" name="email" id="customerEmail" required placeholder="Email address">
+                    </div>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Save Customer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Jobs Modal -->
+<div class="modal fade" id="jobsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content bg-dark text-white">
+            <div class="modal-header border-0">
+                <h5 class="modal-title text-purple">Jobs for <span id="jobsCustomerName"></span></h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="jobsList" class="row g-2">
+                    <!-- Jobs will be added here dynamically -->
+                </div>
+                <div class="mt-3 text-end">
+                    <button class="btn btn-primary" onclick="showAddJobModal()">
+                        <i class="fas fa-plus"></i> Add New Job
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add/Edit Job Modal -->
+<div class="modal fade" id="jobModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content bg-dark text-white">
+            <div class="modal-header border-0">
+                <h5 class="modal-title text-purple">Add New Job</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="jobForm">
+                <div class="modal-body">
+                    <input type="hidden" id="jobCustomerId" name="customer_id">
+                    <div class="expense-group mb-2">
+                        <label class="form-label">Description</label>
+                        <textarea class="form-control" name="description" required rows="3" placeholder="Job description"></textarea>
+                    </div>
+                    <div class="expense-group mb-2">
+                        <label class="form-label">Estimated Hours</label>
+                        <div class="input-group">
+                            <input type="number" class="form-control" name="estimated_hours" required min="0" step="0.5" placeholder="0">
+                            <span class="input-group-text">hours</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Save Job</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<style>
+    .expense-group {
+        transition: all 0.3s ease;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 12px;
+        padding: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .expense-group:hover {
+        border-color: rgba(167, 139, 250, 0.5);
+        box-shadow: 0 0 20px rgba(167, 139, 250, 0.1);
+    }
+
+    .table {
+        margin-bottom: 0;
+        color: white;
+    }
+
+    .table th {
+        border-top: none;
+        color: #a78bfa;
+        font-weight: 500;
+        padding: 8px 12px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        background: var(--dark-bg);
+    }
+
+    .table td {
+        padding: 8px 12px;
+        vertical-align: middle;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .table tr:hover td {
+        background: rgba(167, 139, 250, 0.05);
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 8px;
+        justify-content: flex-end;
+    }
+
+    .form-control {
+        background: var(--dark-bg) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        color: white !important;
+        padding: 8px 12px;
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: all 0.2s ease;
+    }
+
+    .form-control:focus {
+        border-color: #a78bfa !important;
+        box-shadow: 0 0 0 2px rgba(167, 139, 250, 0.25) !important;
+    }
+
+    .input-group {
+        background: transparent;
+        gap: 8px;
+    }
+
+    .input-group-text {
+        background: var(--dark-bg);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: #a78bfa;
+        padding: 8px 12px;
+        border-radius: 8px;
+        font-weight: 500;
+    }
+
+    .btn {
+        padding: 8px 16px;
+        border-radius: 8px;
+        transition: all 0.2s ease;
+        font-weight: 500;
+    }
+
+    .btn-sm {
+        padding: 6px 10px;
+        font-size: 0.875rem;
+    }
+
+    .sort-buttons .btn {
+        margin-right: 0.5rem;
+        padding: 6px 12px;
+        font-size: 0.875rem;
+    }
+
+    .sort-buttons .btn:last-child {
+        margin-right: 0;
+    }
+
+    .btn-outline-primary {
+        color: #a78bfa;
+        border: 1px solid rgba(167, 139, 250, 0.3);
+    }
+
+    .btn-outline-primary:hover {
+        background: rgba(167, 139, 250, 0.1);
+        color: #c4b5fd;
+        border-color: rgba(167, 139, 250, 0.5);
+    }
+
+    .btn-outline-danger {
+        color: #ef4444;
+        border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .btn-outline-danger:hover {
+        background: rgba(239, 68, 68, 0.1);
+        color: #f87171;
+        border-color: rgba(239, 68, 68, 0.5);
+    }
+
+    .btn-outline-info {
+        color: #0ea5e9;
+        border: 1px solid rgba(14, 165, 233, 0.3);
+    }
+
+    .btn-outline-info:hover {
+        background: rgba(14, 165, 233, 0.1);
+        color: #38bdf8;
+        border-color: rgba(14, 165, 233, 0.5);
+    }
+
+    .btn-outline-secondary {
+        color: #9ca3af;
+        border: 1px solid rgba(156, 163, 175, 0.3);
+    }
+
+    .btn-outline-secondary:hover {
+        background: rgba(156, 163, 175, 0.1);
+        color: #d1d5db;
+        border-color: rgba(156, 163, 175, 0.5);
+    }
+
+    .btn-primary {
+        background: #a78bfa;
+        border: none;
+    }
+
+    .btn-primary:hover {
+        background: #9061f9;
+    }
+
+    .form-label {
+        color: #a78bfa;
+        font-weight: 500;
+        margin-bottom: 6px;
+        font-size: 1rem;
+    }
+
+    .modal-content {
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+    }
+
+    .modal-header {
+        padding: 16px 20px;
+    }
+
+    .modal-body {
+        padding: 16px 20px;
+    }
+
+    .modal-footer {
+        padding: 16px 20px;
+    }
+
+    .alert {
+        border-radius: 8px;
+        border: none;
+        padding: 12px;
+        margin-bottom: 16px;
+    }
+
+    .alert-success {
+        background: rgba(52, 211, 153, 0.1);
+        color: #34d399;
+    }
+
+    .alert-danger {
+        background: rgba(239, 68, 68, 0.1);
+        color: #ef4444;
+    }
+
+    .badge {
+        padding: 0.5em 0.75em;
+        font-weight: 500;
+        border-radius: 6px;
+    }
+</style>
+
+<script>
+function loadCustomers() {
+    fetch('/get_customers')
+        .then(response => response.json())
+        .then(data => {
+            const tableBody = document.getElementById('customerTableBody');
+            tableBody.innerHTML = '';
+            
+            data.customers.forEach(customer => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${customer.name}</td>
+                    <td>${customer.phone}</td>
+                    <td>${customer.email}</td>
+                    <td>${customer.address}</td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="btn btn-sm btn-outline-primary" onclick="editCustomer('${customer.customer_id}')">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger" onclick="deleteCustomer('${customer.customer_id}')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-info" onclick="viewJobs('${customer.customer_id}', '${customer.name}')">
+                                <i class="fas fa-clipboard-list"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        });
+}
+
+function showAddCustomerModal() {
+    const modal = document.getElementById('customerModal');
+    const form = document.getElementById('customerForm');
+    form.reset();
+    document.getElementById('customerId').value = '';
+    modal.querySelector('.modal-title').textContent = 'Add New Customer';
+    new bootstrap.Modal(modal).show();
+}
+
+function editCustomer(customerId) {
+    fetch(`/get_customer/${customerId}`)
+        .then(response => response.json())
+        .then(data => {
+            const modal = document.getElementById('customerModal');
+            modal.querySelector('.modal-title').textContent = 'Edit Customer';
+            
+            document.getElementById('customerId').value = data.customer_id;
+            document.getElementById('customerName').value = data.name;
+            document.getElementById('customerAddress').value = data.address;
+            document.getElementById('customerPhone').value = data.phone;
+            document.getElementById('customerEmail').value = data.email;
+            
+            new bootstrap.Modal(modal).show();
+        });
+}
+
+function sortCustomers(by) {
+    const tableBody = document.getElementById('customerTableBody');
+    const rows = Array.from(tableBody.children);
+    
+    rows.sort((a, b) => {
+        if (by === 'name') {
+            const nameA = a.cells[0].textContent.toLowerCase();
+            const nameB = b.cells[0].textContent.toLowerCase();
+            return nameA.localeCompare(nameB);
+        } else if (by === 'date') {
+            const idA = a.querySelector('.btn').getAttribute('onclick').match(/'([^']+)'/)[1];
+            const idB = b.querySelector('.btn').getAttribute('onclick').match(/'([^']+)'/)[1];
+            return idB.localeCompare(idA);
+        }
+    });
+
+    tableBody.innerHTML = '';
+    rows.forEach((row, index) => {
+        row.style.opacity = '0';
+        tableBody.appendChild(row);
+        setTimeout(() => {
+            row.style.opacity = '1';
+        }, index * 50);
+    });
+}
+
+// ... rest of your existing JavaScript functions ...
+
+document.addEventListener('DOMContentLoaded', function() {
+    loadCustomers();
+    
+    document.getElementById('customerForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        const data = Object.fromEntries(formData);
+        const isEdit = data.customer_id;
+        
+        fetch(isEdit ? `/update_customer/${data.customer_id}` : '/add_customer', {
+            method: isEdit ? 'PUT' : 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                bootstrap.Modal.getInstance(document.getElementById('customerModal')).hide();
+                loadCustomers();
+            }
+        });
+    });
+});
+</script>
+{% endblock %} 

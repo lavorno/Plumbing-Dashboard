@@ -1,0 +1,25 @@
+{
+    "trucks": [
+        {
+            "truck_id": "t1-2024-01",
+            "name": "Pierce Brothers Truck",
+            "make": "Ford",
+            "model": "Transit-350",
+            "year": "2024",
+            "license_plate": "TX1001",
+            "employee_ids": [
+                "96ea524a-010d-4f7c-a532-58eaa01de46f",
+                "ea6dd5e3-1543-4651-89a4-b3940767108e"
+            ],
+            "effective_hours": 40.0,
+            "loan_payment": 800.0,
+            "insurance": 200.0,
+            "fuel_budget": 400.0,
+            "maintenance_budget": 100.0,
+            "other_expenses": 0.0,
+            "service_area": "Tyler Area",
+            "notes": "Pierce Brothers Master/Journeyman Team",
+            "created_at": "2024-01-21T19:10:15.527399"
+        }
+    ]
+}

@@ -1,0 +1,24 @@
+{
+    "employees": [
+        {
+            "employee_id": "96ea524a-010d-4f7c-a532-58eaa01de46f",
+            "name": "Christopher Pierce",
+            "phone": "9038217004",
+            "email": "chrishpierce45076@gmail.com",
+            "position": "Manager",
+            "hours_per_week": 40.0,
+            "hourly_wage": 35.0,
+            "created_at": "2024-01-21T18:16:39.946125"
+        },
+        {
+            "employee_id": "ea6dd5e3-1543-4651-89a4-b3940767108e",
+            "name": "Pierce Brother",
+            "phone": "903-555-1002",
+            "email": "pierce.brother@example.com",
+            "position": "Apprentice",
+            "hours_per_week": 40.0,
+            "hourly_wage": 20.0,
+            "created_at": "2024-01-21T18:17:37.541556"
+        }
+    ]
+}
