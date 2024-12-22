@@ -24,8 +24,20 @@
                             </button>
                         </div>
 
-                        <div id="all-expenses" class="row g-2">
-                            <!-- All expenses will be added here dynamically -->
+                        <!-- General Expenses Section -->
+                        <div class="expense-section mb-4">
+                            <h6 class="text-purple mb-3">General Expenses</h6>
+                            <div id="all-expenses" class="row g-2">
+                                <!-- All general expenses will be added here dynamically -->
+                            </div>
+                        </div>
+
+                        <!-- Truck Expenses Section -->
+                        <div class="expense-section mb-4">
+                            <h6 class="text-purple mb-3">Truck Expenses</h6>
+                            <div id="truck-expenses" class="row g-2">
+                                <!-- Truck expenses will be added here dynamically -->
+                            </div>
                         </div>
 
                         <div class="expense-group mt-3" id="total-expenses" style="background: rgba(167, 139, 250, 0.1);">
@@ -418,65 +430,177 @@
         }, 3000);
     }
 
-    // Load initial expenses
-    fetch('/get_settings')
-        .then(response => response.json())
-        .then(data => {
-            const allExpenses = document.getElementById('all-expenses');
-            allExpenses.innerHTML = ''; // Clear existing expenses
+    async function loadTruckExpenses() {
+        try {
+            const response = await fetch('/get_trucks');
+            const data = await response.json();
+            const truckExpensesDiv = document.getElementById('truck-expenses');
             
-            const expenses = data.overhead_costs || {};
-            console.log('Loaded expenses:', expenses); // Debug log
-            
-            // Filter out employee_wages from the expenses
-            const filteredExpenses = Object.entries(expenses).filter(([name]) => name !== 'employee_wages');
-            
-            if (filteredExpenses.length === 0) {
-                showAlert('info', 'No expenses found. Add your first expense!');
-            } else {
-                filteredExpenses.forEach(([name, value]) => {
-                    if (name && value !== undefined) {
-                        console.log(`Creating expense: ${name} = ${value}`); // Debug log
-                        const expenseElement = createExpenseElement(name, value);
-                        allExpenses.appendChild(expenseElement);
-                    }
-                });
+            data.trucks.forEach(truck => {
+                const totalTruckExpenses = (
+                    parseFloat(truck.loan_payment || 0) +
+                    parseFloat(truck.insurance || 0) +
+                    parseFloat(truck.fuel_budget || 0) +
+                    parseFloat(truck.maintenance_budget || 0) +
+                    parseFloat(truck.other_expenses || 0)
+                );
+
+                const truckExpenseElement = document.createElement('div');
+                truckExpenseElement.className = 'col-md-6';
+                truckExpenseElement.innerHTML = `
+                    <div class="expense-group">
+                        <div class="input-group">
+                            <span class="form-control expense-name">${truck.name}</span>
+                            <span class="input-group-text">$</span>
+                            <span class="form-control text-end">${totalTruckExpenses.toFixed(2)}</span>
+                            <button type="button" class="btn expense-info" 
+                                    onclick="showTruckExpenseDetails('${truck.truck_id}')"
+                                    title="View Details">
+                                <i class="fas fa-info-circle"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                truckExpensesDiv.appendChild(truckExpenseElement);
+            });
+        } catch (error) {
+            console.error('Error loading truck expenses:', error);
+        }
+    }
+
+    function showTruckExpenseDetails(truckId) {
+        fetch(`/get_truck/${truckId}`)
+            .then(response => response.json())
+            .then(truck => {
+                const details = `
+                    <div class="truck-expense-details">
+                        <h6 class="mb-3">${truck.name} Expenses Breakdown</h6>
+                        <div class="expense-item">
+                            <span>Loan Payment</span>
+                            <span>$${parseFloat(truck.loan_payment || 0).toFixed(2)}</span>
+                        </div>
+                        <div class="expense-item">
+                            <span>Insurance</span>
+                            <span>$${parseFloat(truck.insurance || 0).toFixed(2)}</span>
+                        </div>
+                        <div class="expense-item">
+                            <span>Fuel Budget</span>
+                            <span>$${parseFloat(truck.fuel_budget || 0).toFixed(2)}</span>
+                        </div>
+                        <div class="expense-item">
+                            <span>Maintenance Budget</span>
+                            <span>$${parseFloat(truck.maintenance_budget || 0).toFixed(2)}</span>
+                        </div>
+                        <div class="expense-item">
+                            <span>Other Expenses</span>
+                            <span>$${parseFloat(truck.other_expenses || 0).toFixed(2)}</span>
+                        </div>
+                        <div class="expense-total">
+                            <strong>Total</strong>
+                            <strong>$${(
+                                parseFloat(truck.loan_payment || 0) +
+                                parseFloat(truck.insurance || 0) +
+                                parseFloat(truck.fuel_budget || 0) +
+                                parseFloat(truck.maintenance_budget || 0) +
+                                parseFloat(truck.other_expenses || 0)
+                            ).toFixed(2)}</strong>
+                        </div>
+                    </div>
+                `;
                 
-                // Calculate and show total after all expenses are added
-                setTimeout(() => {
-                    updateTotal();
-                    console.log('Total updated'); // Debug log
-                }, 100);
+                // Show the details in a Bootstrap modal
+                const modal = new bootstrap.Modal(document.getElementById('expenseDetailsModal'));
+                document.querySelector('#expenseDetailsModal .modal-body').innerHTML = details;
+                modal.show();
+            });
+    }
+
+    // Modify the existing loadExpenses function to handle both general and truck expenses
+    async function loadExpenses() {
+        try {
+            const [expensesResponse, trucksResponse] = await Promise.all([
+                fetch('/get_expenses'),
+                fetch('/get_trucks')
+            ]);
+            
+            const expensesData = await expensesResponse.json();
+            const trucksData = await trucksResponse.json();
+            
+            // Clear existing expenses
+            document.getElementById('all-expenses').innerHTML = '';
+            document.getElementById('truck-expenses').innerHTML = '';
+            
+            // Load general expenses
+            let totalExpenses = 0;
+            for (const [name, amount] of Object.entries(expensesData.overhead_costs)) {
+                // Skip truck-specific expenses as they'll be handled separately
+                if (!name.endsWith('_expenses')) {
+                    const expenseElement = createExpenseElement(name, amount);
+                    document.getElementById('all-expenses').appendChild(expenseElement);
+                    totalExpenses += parseFloat(amount);
+                }
             }
             
-            initializePopovers();
-        })
-        .catch(error => {
-            console.error('Error loading settings:', error);
-            // Only show error message if we failed to load any data
-            const allExpenses = document.getElementById('all-expenses');
-            if (!allExpenses.children.length) {
-                showAlert('danger', 'Error loading settings. Please try again.');
+            // Load truck expenses
+            trucksData.trucks.forEach(truck => {
+                const truckTotal = (
+                    parseFloat(truck.loan_payment || 0) +
+                    parseFloat(truck.insurance || 0) +
+                    parseFloat(truck.fuel_budget || 0) +
+                    parseFloat(truck.maintenance_budget || 0) +
+                    parseFloat(truck.other_expenses || 0)
+                );
+                totalExpenses += truckTotal;
                 
-                // Load default expenses if there's an error (excluding employee_wages)
-                const defaultExpenses = {
-                    'rent': 2000,
-                    'utilities': 500,
-                    'insurance': 1000,
-                    'tools_equipment': 500,
-                    'vehicle_expenses': 800,
-                    'marketing': 400,
-                    'misc_expenses': 300
-                };
-                
-                Object.entries(defaultExpenses).forEach(([name, value]) => {
-                    const expenseElement = createExpenseElement(name, value);
-                    allExpenses.appendChild(expenseElement);
-                });
-                
-                initializePopovers();
-                updateTotal();
-            }
-        });
+                const truckExpenseElement = document.createElement('div');
+                truckExpenseElement.className = 'col-md-6';
+                truckExpenseElement.innerHTML = `
+                    <div class="expense-group">
+                        <div class="input-group">
+                            <span class="form-control expense-name">${truck.name}</span>
+                            <span class="input-group-text">$</span>
+                            <span class="form-control text-end">${truckTotal.toFixed(2)}</span>
+                            <button type="button" class="btn expense-info" 
+                                    onclick="showTruckExpenseDetails('${truck.truck_id}')"
+                                    title="View Details">
+                                <i class="fas fa-info-circle"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                document.getElementById('truck-expenses').appendChild(truckExpenseElement);
+            });
+            
+            // Update total
+            document.getElementById('expenses-total').textContent = totalExpenses.toFixed(2);
+            
+        } catch (error) {
+            console.error('Error loading expenses:', error);
+            showAlert('error', 'Failed to load expenses');
+        }
+    }
+
+    // Call loadExpenses when the page loads
+    document.addEventListener('DOMContentLoaded', function() {
+        loadExpenses();
+    });
 </script>
+
+<!-- Add modal for expense details -->
+<div class="modal fade" id="expenseDetailsModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content bg-dark text-white">
+            <div class="modal-header border-bottom border-secondary">
+                <h5 class="modal-title">Expense Details</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Details will be inserted here -->
+            </div>
+            <div class="modal-footer border-top border-secondary">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %} 

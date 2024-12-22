@@ -3,17 +3,21 @@
         "glue": 11,
         "insurance": 600,
         "marketing": 1600,
-        "misc_expenses": 1000,
         "rent": 1506,
         "tools_equipment": 1000,
         "utilities": 500,
-        "employee_wages": 47040.0,
-        "vehicle_expenses": 1400.0
+        "employee_wages": 46240.0,
+        "vehicle_expenses": 8050.0,
+        "truck_1_expenses": 1650.0,
+        "truck_2_expenses": 1600.0,
+        "truck_3_expenses": 1600.0,
+        "truck_4_expenses": 1600.0,
+        "truck_5_expenses": 1600.0
     },
     "business_parameters": {
-        "efficiency_rate": 0.45,
-        "profit_margin_multiplier": 0.55,
+        "efficiency_rate": 0.8,
+        "profit_margin_multiplier": 0.7,
         "locked_hourly_rate": null,
-        "hourly_rate": 245.0
+        "hourly_rate": 210.0
     }
 }

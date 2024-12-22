@@ -981,6 +981,56 @@ def get_business_parameters():
         print(f"Error loading business parameters: {str(e)}")  # Server-side log
         return jsonify({'success': False, 'error': str(e)})
 
+@app.route('/get_expenses')
+def get_expenses():
+    """Get all expenses including truck expenses"""
+    try:
+        # Load expenses from config file
+        with open('config/expenses.json', 'r') as f:
+            expenses_data = json.load(f)
+        
+        # Load trucks data
+        trucks = load_trucks_from_json()
+        
+        # Create individual expense entries for each truck
+        truck_expenses = {}
+        for truck in trucks:
+            truck_name = truck['name'].lower().replace(' ', '_')
+            truck_total = (
+                float(truck.get('loan_payment', 0)) +
+                float(truck.get('insurance', 0)) +
+                float(truck.get('fuel_budget', 0)) +
+                float(truck.get('maintenance_budget', 0)) +
+                float(truck.get('other_expenses', 0))
+            )
+            truck_expenses[f"{truck_name}_expenses"] = truck_total
+        
+        # Update overhead_costs with truck expenses
+        if 'overhead_costs' not in expenses_data:
+            expenses_data['overhead_costs'] = {}
+        
+        # Remove any old truck expense entries
+        expenses_data['overhead_costs'] = {
+            k: v for k, v in expenses_data['overhead_costs'].items() 
+            if not k.endswith('_expenses') or k == 'vehicle_expenses'
+        }
+        
+        # Add new truck expenses
+        expenses_data['overhead_costs'].update(truck_expenses)
+        
+        # Calculate and update total vehicle expenses
+        total_vehicle_expenses = sum(truck_expenses.values())
+        expenses_data['overhead_costs']['vehicle_expenses'] = total_vehicle_expenses
+        
+        # Save the updated expenses back to the file
+        with open('config/expenses.json', 'w') as f:
+            json.dump(expenses_data, f, indent=4)
+        
+        return jsonify(expenses_data)
+    except Exception as e:
+        print(f"Error getting expenses: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
 if __name__ == '__main__':
     # Initialize empty JSON files if they don't exist
     if not os.path.exists('config/customers.json'):

@@ -1,0 +1,675 @@
+{% extends "base.html" %}
+{% block title %}Debug Panel{% endblock %}
+
+{% block content %}
+<div class="debug-container">
+    <div class="debug-header">
+        <h1><i class="fas fa-bug"></i> Debug Panel</h1>
+        <p class="subtitle">Real-time data flow and calculations visualization</p>
+    </div>
+
+    <div class="debug-grid">
+        <!-- Source Files Panel -->
+        <div class="debug-panel source-files">
+            <div class="panel-header">
+                <h2><i class="fas fa-database"></i> Source Files</h2>
+            </div>
+            <div class="source-files-content">
+                <div class="file-card" id="expensesCard">
+                    <div class="file-icon"><i class="fas fa-file-invoice-dollar"></i></div>
+                    <div class="file-name">expenses.json</div>
+                    <div class="file-path">config/expenses.json</div>
+                    <div class="file-content" id="expensesList"></div>
+                </div>
+
+                <div class="file-card" id="parametersCard">
+                    <div class="file-icon"><i class="fas fa-sliders-h"></i></div>
+                    <div class="file-name">business_parameters.json</div>
+                    <div class="file-path">config/business_parameters.json</div>
+                    <div class="file-content" id="parametersList"></div>
+                </div>
+
+                <div class="file-card" id="employeesCard">
+                    <div class="file-icon"><i class="fas fa-users"></i></div>
+                    <div class="file-name">employees.json</div>
+                    <div class="file-path">config/employees.json</div>
+                    <div class="file-content" id="employeesList"></div>
+                </div>
+
+                <div class="file-card" id="trucksCard">
+                    <div class="file-icon"><i class="fas fa-truck"></i></div>
+                    <div class="file-name">trucks.json</div>
+                    <div class="file-path">config/trucks.json</div>
+                    <div class="file-content" id="trucksList"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Data Flow Panel -->
+        <div class="debug-panel data-flow">
+            <div class="panel-header">
+                <h2><i class="fas fa-project-diagram"></i> Data Flow</h2>
+            </div>
+            <div class="flow-diagram">
+                <div class="flow-section">
+                    <div class="flow-title">Employee Data Flow</div>
+                    <div class="flow-steps" id="employeeWagesFlow"></div>
+                </div>
+                <div class="flow-section">
+                    <div class="flow-title">Vehicle Data Flow</div>
+                    <div class="flow-steps" id="vehicleExpensesFlow"></div>
+                </div>
+                <div class="flow-section">
+                    <div class="flow-title">Rate Calculation Flow</div>
+                    <div class="flow-steps" id="hourlyRateFlow"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Calculations Panel -->
+        <div class="debug-panel calculations">
+            <div class="panel-header">
+                <h2><i class="fas fa-calculator"></i> Live Calculations</h2>
+            </div>
+            <div class="calculations-grid">
+                <div class="calc-section hours">
+                    <h3>Hours & Efficiency</h3>
+                    <div class="calc-box">
+                        <div class="calc-header">Available Hours</div>
+                        <div class="calc-value" id="availableHours"></div>
+                        <div class="calc-source">
+                            <i class="fas fa-code-branch"></i>
+                            trucks.json → effective_hours + employees.json → hours_per_week
+                        </div>
+                    </div>
+                    <div class="calc-box">
+                        <div class="calc-header">Billable Hours</div>
+                        <div class="calc-value" id="billableHours"></div>
+                        <div class="calc-source">
+                            <i class="fas fa-code-branch"></i>
+                            Available Hours × business_parameters.json → efficiency_rate
+                        </div>
+                    </div>
+                </div>
+
+                <div class="calc-section finances">
+                    <h3>Financial Metrics</h3>
+                    <div class="calc-box">
+                        <div class="calc-header">Total Monthly Expenses</div>
+                        <div class="calc-value" id="totalExpenses"></div>
+                        <div class="calc-source">
+                            <i class="fas fa-code-branch"></i>
+                            Sum of expenses.json → overhead_costs
+                        </div>
+                    </div>
+                    <div class="calc-box">
+                        <div class="calc-header">Cost Per Hour</div>
+                        <div class="calc-value" id="costPerHour"></div>
+                        <div class="calc-source">
+                            <i class="fas fa-code-branch"></i>
+                            Total Expenses ÷ Billable Hours
+                        </div>
+                    </div>
+                    <div class="calc-box highlight">
+                        <div class="calc-header">Required Hourly Rate</div>
+                        <div class="calc-value" id="hourlyRate"></div>
+                        <div class="calc-source">
+                            <i class="fas fa-code-branch"></i>
+                            Cost Per Hour ÷ business_parameters.json → profit_margin
+                        </div>
+                    </div>
+                </div>
+
+                <div class="calc-section projections">
+                    <h3>Projections</h3>
+                    <div class="calc-box">
+                        <div class="calc-header">Monthly Revenue</div>
+                        <div class="calc-value" id="monthlyRevenue"></div>
+                        <div class="calc-source">
+                            <i class="fas fa-code-branch"></i>
+                            Hourly Rate × Billable Hours
+                        </div>
+                    </div>
+                    <div class="calc-box highlight">
+                        <div class="calc-header">Monthly Profit</div>
+                        <div class="calc-value" id="monthlyProfit"></div>
+                        <div class="calc-source">
+                            <i class="fas fa-code-branch"></i>
+                            Monthly Revenue - Total Expenses
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Dark Theme Colors */
+:root {
+    --bg-primary: #1a1a1a;
+    --bg-secondary: #2d2d2d;
+    --bg-tertiary: #363636;
+    --text-primary: #ffffff;
+    --text-secondary: #b3b3b3;
+    --accent-primary: #8a2be2;
+    --accent-secondary: #9370db;
+    --border-color: #404040;
+    --success-color: #00c853;
+    --info-color: #2196f3;
+}
+
+/* Main Container */
+.debug-container {
+    background: var(--bg-primary);
+    min-height: 100vh;
+    padding: 20px;
+    color: var(--text-primary);
+}
+
+.debug-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.debug-header h1 {
+    color: var(--accent-primary);
+    font-size: 2.5em;
+    margin-bottom: 10px;
+}
+
+.subtitle {
+    color: var(--text-secondary);
+    font-size: 1.1em;
+}
+
+/* Grid Layout */
+.debug-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+/* Panels */
+.debug-panel {
+    background: var(--bg-secondary);
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+.panel-header {
+    background: var(--bg-tertiary);
+    padding: 15px 20px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.panel-header h2 {
+    color: var(--accent-secondary);
+    font-size: 1.3em;
+    margin: 0;
+}
+
+/* Source Files */
+.source-files-content {
+    padding: 20px;
+    display: grid;
+    gap: 20px;
+}
+
+.file-card {
+    background: var(--bg-tertiary);
+    border-radius: 8px;
+    padding: 15px;
+    border: 1px solid var(--border-color);
+}
+
+.file-icon {
+    color: var(--accent-primary);
+    font-size: 1.5em;
+    margin-bottom: 10px;
+}
+
+.file-name {
+    color: var(--text-primary);
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.file-path {
+    color: var(--text-secondary);
+    font-family: monospace;
+    font-size: 0.9em;
+    margin-bottom: 10px;
+}
+
+.file-content {
+    background: var(--bg-primary);
+    border-radius: 6px;
+    padding: 10px;
+    font-family: monospace;
+}
+
+/* Data Flow */
+.flow-diagram {
+    padding: 20px;
+}
+
+.flow-section {
+    margin-bottom: 25px;
+}
+
+.flow-title {
+    color: var(--accent-secondary);
+    font-size: 1.1em;
+    margin-bottom: 10px;
+}
+
+.flow-steps {
+    background: var(--bg-tertiary);
+    border-radius: 8px;
+    padding: 15px;
+}
+
+.flow-step {
+    background: var(--bg-primary);
+    padding: 10px 15px;
+    margin: 8px 0;
+    border-radius: 6px;
+    position: relative;
+    padding-left: 30px;
+}
+
+.flow-step::before {
+    content: "↓";
+    position: absolute;
+    left: 10px;
+    color: var(--accent-primary);
+}
+
+.flow-step:first-child::before {
+    display: none;
+}
+
+/* Calculations */
+.calculations-grid {
+    padding: 20px;
+    display: grid;
+    gap: 20px;
+}
+
+.calc-section {
+    background: var(--bg-tertiary);
+    border-radius: 8px;
+    padding: 15px;
+}
+
+.calc-section h3 {
+    color: var(--accent-secondary);
+    margin-bottom: 15px;
+    font-size: 1.2em;
+}
+
+.calc-box {
+    background: var(--bg-primary);
+    border-radius: 6px;
+    padding: 15px;
+    margin-bottom: 15px;
+}
+
+.calc-box.highlight {
+    border: 1px solid var(--accent-primary);
+}
+
+.calc-header {
+    color: var(--text-secondary);
+    font-size: 0.9em;
+    margin-bottom: 5px;
+}
+
+.calc-value {
+    color: var(--text-primary);
+    font-size: 1.3em;
+    font-weight: bold;
+    margin: 5px 0;
+}
+
+.calc-source {
+    color: var(--text-secondary);
+    font-size: 0.85em;
+    margin-top: 5px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.calc-source i {
+    color: var(--accent-primary);
+}
+
+/* Data Items */
+.data-item {
+    background: var(--bg-secondary);
+    padding: 8px 12px;
+    margin: 5px 0;
+    border-radius: 4px;
+    border: 1px solid var(--border-color);
+}
+
+.data-item strong {
+    color: var(--accent-secondary);
+}
+
+.calc-source {
+    color: var(--text-secondary);
+    font-size: 0.85em;
+    padding: 4px 8px;
+    background: var(--bg-tertiary);
+    border-radius: 4px;
+    margin-top: 5px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .debug-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+
+<script>
+function formatCurrency(value) {
+    return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD'
+    }).format(value);
+}
+
+function formatNumber(value) {
+    return new Intl.NumberFormat('en-US', {
+        maximumFractionDigits: 2
+    }).format(value);
+}
+
+function updateDebugPanel() {
+    fetch('/api/debug_data')
+        .then(response => response.json())
+        .then(data => {
+            // Update expenses.json data
+            const expensesList = document.getElementById('expensesList');
+            expensesList.innerHTML = `
+                <div class="expense-breakdown">
+                    <h4>Monthly Overhead Costs</h4>
+                    ${Object.entries(data.overhead_costs.data)
+                        .map(([key, value]) => `
+                            <div class="data-item ${key === 'employee_wages' || key === 'vehicle_expenses' ? 'calculated' : ''}">
+                                <div class="data-header">
+                                    <strong>${key.replace(/_/g, ' ').toUpperCase()}</strong>
+                                    <span class="value">${formatCurrency(value)}</span>
+                                </div>
+                                <div class="calc-source">
+                                    ${data.overhead_costs.calculated_fields[key] || 
+                                      `Direct value from ${data.overhead_costs.source_file}`}
+                                </div>
+                                ${key === 'employee_wages' ? `
+                                    <div class="formula-breakdown">
+                                        <div class="formula-title">Calculation:</div>
+                                        <div class="formula-step">Sum of (hourly_wage × hours_per_week × 4) for each employee</div>
+                                    </div>
+                                ` : ''}
+                                ${key === 'vehicle_expenses' ? `
+                                    <div class="formula-breakdown">
+                                        <div class="formula-title">Calculation:</div>
+                                        <div class="formula-step">Sum of (loan_payment + insurance + fuel_budget + maintenance_budget + other_expenses) for each truck</div>
+                                    </div>
+                                ` : ''}
+                            </div>
+                        `).join('')}
+                    <div class="data-item total">
+                        <div class="data-header">
+                            <strong>TOTAL MONTHLY EXPENSES</strong>
+                            <span class="value">${formatCurrency(Object.values(data.overhead_costs.data).reduce((a, b) => a + parseFloat(b), 0))}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Update business_parameters.json data
+            const parametersList = document.getElementById('parametersList');
+            parametersList.innerHTML = `
+                <div class="parameters-breakdown">
+                    <h4>Business Parameters</h4>
+                    ${Object.entries(data.business_parameters.data)
+                        .map(([key, value]) => `
+                            <div class="data-item">
+                                <div class="data-header">
+                                    <strong>${key.replace(/_/g, ' ').toUpperCase()}</strong>
+                                    <span class="value">${key.includes('rate') ? (value * 100).toFixed(0) + '%' : value}</span>
+                                </div>
+                                <div class="calc-source">Direct value from ${data.business_parameters.source_file}</div>
+                                <div class="parameter-impact">
+                                    <div class="impact-title">Affects:</div>
+                                    ${key === 'efficiency_rate' ? `
+                                        <div class="impact-detail">Billable Hours = Available Hours × ${(value * 100).toFixed(0)}%</div>
+                                    ` : key === 'profit_margin_multiplier' ? `
+                                        <div class="impact-detail">Hourly Rate = Cost Per Hour ÷ ${value} (${((1-value) * 100).toFixed(0)}% profit margin)</div>
+                                    ` : ''}
+                                </div>
+                            </div>
+                        `).join('')}
+                </div>
+            `;
+
+            // Update employees.json data
+            document.getElementById('employeesList').innerHTML = `
+                <div class="employee-breakdown">
+                    <h4>Employee Statistics</h4>
+                    <div class="data-item">
+                        <div class="data-header">
+                            <strong>TOTAL EMPLOYEES</strong>
+                            <span class="value">${data.employees.data.count}</span>
+                        </div>
+                        <div class="calc-source">Source: ${data.employees.source_file}</div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-header">
+                            <strong>TOTAL MONTHLY WAGES</strong>
+                            <span class="value">${formatCurrency(data.employees.data.total_wages)}</span>
+                        </div>
+                        <div class="calc-source">Calculated from employee hours and wages in ${data.employees.source_file}</div>
+                        <div class="formula-breakdown">
+                            <div class="formula-title">Formula:</div>
+                            <div class="formula-step">For each employee:</div>
+                            <div class="formula-step indent">Monthly Wage = Hourly Rate × Hours per Week × 4 weeks</div>
+                            <div class="formula-step">Total = Sum of all employee monthly wages</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Update trucks.json data
+            document.getElementById('trucksList').innerHTML = `
+                <div class="truck-breakdown">
+                    <h4>Vehicle Statistics</h4>
+                    <div class="data-item">
+                        <div class="data-header">
+                            <strong>TOTAL TRUCKS</strong>
+                            <span class="value">${data.trucks.data.count}</span>
+                        </div>
+                        <div class="calc-source">Source: ${data.trucks.source_file}</div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-header">
+                            <strong>TOTAL VEHICLE EXPENSES</strong>
+                            <span class="value">${formatCurrency(data.trucks.data.total_expenses)}</span>
+                        </div>
+                        <div class="calc-source">Calculated from expenses in ${data.trucks.source_file}</div>
+                        <div class="formula-breakdown">
+                            <div class="formula-title">Formula:</div>
+                            <div class="formula-step">For each truck:</div>
+                            <div class="formula-step indent">Monthly Expense = Loan Payment + Insurance + Fuel Budget + Maintenance Budget + Other Expenses</div>
+                            <div class="formula-step">Total = Sum of all truck monthly expenses</div>
+                        </div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-header">
+                            <strong>TOTAL AVAILABLE HOURS</strong>
+                            <span class="value">${formatNumber(data.trucks.data.total_hours)} hours/month</span>
+                        </div>
+                        <div class="calc-source">Calculated from truck hours in ${data.trucks.source_file}</div>
+                        <div class="formula-breakdown">
+                            <div class="formula-title">Formula:</div>
+                            <div class="formula-step">For each truck:</div>
+                            <div class="formula-step indent">If effective_hours set: Use effective_hours</div>
+                            <div class="formula-step indent">Otherwise: Sum assigned employee hours per week</div>
+                            <div class="formula-step">Total = Sum of all truck hours × 4 weeks</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Add styles for new elements
+            const style = document.createElement('style');
+            style.textContent = `
+                .expense-breakdown, .parameters-breakdown, .employee-breakdown, .truck-breakdown {
+                    margin-bottom: 20px;
+                }
+
+                .expense-breakdown h4, .parameters-breakdown h4, .employee-breakdown h4, .truck-breakdown h4 {
+                    color: var(--accent-secondary);
+                    margin-bottom: 15px;
+                    font-size: 1.1em;
+                    border-bottom: 1px solid var(--border-color);
+                    padding-bottom: 8px;
+                }
+
+                .data-header {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                }
+
+                .value {
+                    color: var(--accent-primary);
+                    font-family: monospace;
+                }
+
+                .formula-breakdown {
+                    margin-top: 10px;
+                    padding: 8px;
+                    background: var(--bg-primary);
+                    border-radius: 4px;
+                }
+
+                .formula-title {
+                    color: var(--accent-secondary);
+                    font-size: 0.9em;
+                    margin-bottom: 5px;
+                }
+
+                .formula-step {
+                    color: var(--text-secondary);
+                    font-size: 0.9em;
+                    margin: 3px 0;
+                }
+
+                .formula-step.indent {
+                    padding-left: 15px;
+                    position: relative;
+                }
+
+                .formula-step.indent::before {
+                    content: "→";
+                    position: absolute;
+                    left: 0;
+                    color: var(--accent-primary);
+                }
+
+                .parameter-impact {
+                    margin-top: 8px;
+                    padding: 8px;
+                    background: var(--bg-primary);
+                    border-radius: 4px;
+                }
+
+                .impact-title {
+                    color: var(--accent-secondary);
+                    font-size: 0.9em;
+                    margin-bottom: 5px;
+                }
+
+                .impact-detail {
+                    color: var(--text-secondary);
+                    font-size: 0.9em;
+                }
+
+                .data-item.calculated {
+                    border-left: 3px solid var(--accent-primary);
+                }
+
+                .data-item.total {
+                    border-top: 2px solid var(--border-color);
+                    margin-top: 15px;
+                    padding-top: 15px;
+                }
+
+                .data-item.total .value {
+                    font-size: 1.2em;
+                    font-weight: bold;
+                }
+            `;
+            document.head.appendChild(style);
+
+            // Calculate values for display
+            const metrics = data.metrics.data;
+            const totalExpenses = metrics.total_expenses;
+            const availableHours = metrics.available_hours;
+            const billableHours = metrics.billable_hours;
+            const costPerHour = metrics.cost_per_hour;
+            const hourlyRate = metrics.hourly_rate;
+            const monthlyRevenue = metrics.monthly_revenue;
+            const monthlyProfit = metrics.monthly_profit;
+
+            // Update calculated values with source information
+            document.getElementById('availableHours').textContent = `${formatNumber(availableHours)} hours/month`;
+            document.getElementById('billableHours').textContent = `${formatNumber(billableHours)} hours/month`;
+            document.getElementById('totalExpenses').textContent = formatCurrency(totalExpenses);
+            document.getElementById('costPerHour').textContent = formatCurrency(costPerHour);
+            document.getElementById('hourlyRate').textContent = formatCurrency(hourlyRate);
+            document.getElementById('monthlyRevenue').textContent = formatCurrency(monthlyRevenue);
+            document.getElementById('monthlyProfit').textContent = formatCurrency(monthlyProfit);
+
+            // Update data flows with source information
+            document.getElementById('employeeWagesFlow').innerHTML = `
+                <div class="flow-step">1. Read employee data from ${data.employees.source_file}</div>
+                <div class="flow-step">2. Calculate total wages (hours × hourly_wage)</div>
+                <div class="flow-step">3. Update employee_wages in ${data.overhead_costs.source_file}</div>
+            `;
+
+            document.getElementById('vehicleExpensesFlow').innerHTML = `
+                <div class="flow-step">1. Read vehicle data from ${data.trucks.source_file}</div>
+                <div class="flow-step">2. Sum all vehicle-related costs</div>
+                <div class="flow-step">3. Update vehicle_expenses in ${data.overhead_costs.source_file}</div>
+            `;
+
+            document.getElementById('hourlyRateFlow').innerHTML = `
+                <div class="flow-step">1. Calculate total expenses from ${data.overhead_costs.source_file}</div>
+                <div class="flow-step">2. Get efficiency rate from ${data.business_parameters.source_file}</div>
+                <div class="flow-step">3. Calculate billable hours from ${data.trucks.source_file}</div>
+                <div class="flow-step">4. Calculate cost per hour</div>
+                <div class="flow-step">5. Apply profit margin from ${data.business_parameters.source_file}</div>
+            `;
+        })
+        .catch(error => {
+            console.error('Error updating debug panel:', error);
+        });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    updateDebugPanel();
+    // Update every 30 seconds
+    setInterval(updateDebugPanel, 30000);
+});
+</script>
+{% endblock %} 

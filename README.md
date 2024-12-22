@@ -1,4 +1,4 @@
-# Plumbing Dashboard v1.0.0
+# Plumbing Dashboard v1.2.0
 
 A comprehensive web-based dashboard for managing plumbing business operations. This application helps track jobs, manage customer information, and handle scheduling for plumbing services.
 
@@ -61,6 +61,11 @@ Plumbing-Dashboard/
 
 ## Version History
 
+- v1.2.0 - Dashboard Improvements
+  - Fixed monthly expenses display on dashboard
+  - Added individual truck expenses to monthly expenses
+  - Improved expense calculations and display
+  - Enhanced dashboard UI/UX
 - v1.0.0 - Initial release with core functionality
   - Basic customer management
   - Job tracking

@@ -716,6 +716,74 @@
     transform: translateY(-1px);
     box-shadow: 0 2px 4px rgba(167, 139, 250, 0.2);
 }
+
+.overhead-expense td {
+    color: #a78bfa;
+    padding: 4px 8px;
+}
+
+.expense-subtotal td {
+    border-top: 1px solid rgba(167, 139, 250, 0.2);
+    padding: 8px;
+    color: #a78bfa;
+}
+
+.truck-expense-header td {
+    background: rgba(167, 139, 250, 0.1);
+    padding: 8px;
+    color: #a78bfa;
+    margin-top: 12px;
+}
+
+.truck-expense-item td {
+    padding: 4px 16px;
+    color: #e5e7eb;
+}
+
+.truck-expense-subtotal td {
+    border-top: 1px solid rgba(167, 139, 250, 0.2);
+    padding: 8px 16px;
+    color: #a78bfa;
+    margin-bottom: 12px;
+}
+
+.expenses-total {
+    margin-top: 16px;
+    border-top: 2px solid rgba(167, 139, 250, 0.3);
+}
+
+.expense-header td {
+    background: rgba(167, 139, 250, 0.1);
+    padding: 8px;
+    color: #a78bfa;
+    font-weight: 500;
+    border-top: 1px solid rgba(167, 139, 250, 0.2);
+}
+
+.overhead-expense td {
+    color: #e5e7eb;
+    padding: 4px 8px;
+}
+
+.truck-expense-header td {
+    background: rgba(167, 139, 250, 0.1);
+    padding: 8px;
+    color: #a78bfa;
+    font-weight: 500;
+    margin-top: 12px;
+}
+
+.truck-expense-item td {
+    padding: 4px 16px;
+    color: #e5e7eb;
+}
+
+.expense-subtotal td {
+    border-top: 1px solid rgba(167, 139, 250, 0.2);
+    padding: 8px;
+    color: #a78bfa;
+    font-weight: 500;
+}
 </style>
 
 <script>
@@ -896,26 +964,87 @@
 
             // Update expenses list
             const expensesList = document.getElementById('expenses-list');
+            expensesList.innerHTML = '';
+
+            // Add overhead expenses header
+            expensesList.innerHTML += `
+                <tr class="expense-header">
+                    <td colspan="2"><strong>Overhead Expenses</strong></td>
+                </tr>
+            `;
+
+            // Add overhead expenses
             let overhead = {...dashData.overhead_costs};
             delete overhead.vehicle_expenses;
             delete overhead.employee_wages;
 
-            expensesList.innerHTML = '';
+            let totalOverheadExpenses = 0;
             Object.entries(overhead).forEach(([key, value]) => {
                 const formattedKey = key.replace(/_/g, ' ')
                     .split(' ')
                     .map(word => word.charAt(0).toUpperCase() + word.slice(1))
                     .join(' ');
+                const expenseValue = parseFloat(value) || 0;
+                totalOverheadExpenses += expenseValue;
+                
                 expensesList.innerHTML += `
-                    <tr>
+                    <tr class="overhead-expense">
                         <td>${formattedKey}</td>
-                        <td class="text-end">${formatCurrency(value)}</td>
+                        <td class="text-end">${formatCurrency(expenseValue)}</td>
                     </tr>
                 `;
             });
 
-            // Process trucks and expenses
+            // Add truck expenses header
+            expensesList.innerHTML += `
+                <tr class="expense-header">
+                    <td colspan="2"><strong>Truck Expenses</strong></td>
+                </tr>
+            `;
+
             let totalTruckExpenses = 0;
+            trucksData.trucks.forEach(truck => {
+                const truckExpenses = (
+                    parseFloat(truck.loan_payment || 0) +
+                    parseFloat(truck.insurance || 0) +
+                    parseFloat(truck.fuel_budget || 0) +
+                    parseFloat(truck.maintenance_budget || 0) +
+                    parseFloat(truck.other_expenses || 0)
+                );
+                totalTruckExpenses += truckExpenses;
+                
+                expensesList.innerHTML += `
+                    <tr class="truck-expense-item">
+                        <td>${truck.name}</td>
+                        <td class="text-end">${formatCurrency(truckExpenses)}</td>
+                    </tr>
+                `;
+            });
+
+            // Add employee wages if they exist
+            const employeeWages = parseFloat(dashData.overhead_costs.employee_wages) || 0;
+            if (employeeWages > 0) {
+                expensesList.innerHTML += `
+                    <tr class="expense-subtotal">
+                        <td>Employee Wages</td>
+                        <td class="text-end">${formatCurrency(employeeWages)}</td>
+                    </tr>
+                `;
+            }
+
+            // Add total expenses
+            const totalExpenses = totalOverheadExpenses + totalTruckExpenses + employeeWages;
+            expensesList.innerHTML += `
+                <tr class="expense-subtotal">
+                    <td><strong>Total Expenses</strong></td>
+                    <td class="text-end"><strong>${formatCurrency(totalExpenses)}</strong></td>
+                </tr>
+            `;
+
+            document.getElementById('expenses-total-value').textContent = formatCurrency(totalExpenses);
+
+            // Update truck summary
+            // Process trucks and expenses
             let totalEmployees = new Set();
             let totalHours = 0;
 
@@ -932,14 +1061,15 @@
                     return sum + (parseFloat(emp.hourly_wage) * parseFloat(emp.hours_per_week) * 4);
                 }, 0);
 
-                const truckExpenses = (parseFloat(truck.loan_payment) || 0) +
-                                    (parseFloat(truck.insurance) || 0) +
-                                    (parseFloat(truck.fuel_budget) || 0) +
-                                    (parseFloat(truck.maintenance_budget) || 0) +
-                                    (parseFloat(truck.other_expenses) || 0);
+                const truckExpenses = (
+                    parseFloat(truck.loan_payment || 0) +
+                    parseFloat(truck.insurance || 0) +
+                    parseFloat(truck.fuel_budget || 0) +
+                    parseFloat(truck.maintenance_budget || 0) +
+                    parseFloat(truck.other_expenses || 0)
+                );
 
                 const totalTruckMonthlyExpenses = truckExpenses + crewWages;
-                totalTruckExpenses += totalTruckMonthlyExpenses;
 
                 // Calculate revenue and profit
                 const monthlyHours = weeklyHours * 4;
@@ -988,9 +1118,6 @@
                 `;
             });
 
-            // Update truck summary
-            const totalExpenses = totalTruckExpenses + Object.values(overhead).reduce((sum, value) => sum + parseFloat(value), 0);
-            document.getElementById('expenses-total-value').textContent = formatCurrency(totalExpenses);
             document.getElementById('total-employees').textContent = `${totalEmployees.size} employees`;
             document.getElementById('total-hours').textContent = `${totalHours} hrs`;
             document.getElementById('total-truck-expenses').textContent = formatCurrency(totalTruckExpenses);
