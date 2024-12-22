@@ -15,9 +15,9 @@
         "truck_5_expenses": 1600.0
     },
     "business_parameters": {
-        "efficiency_rate": 0.8,
-        "profit_margin_multiplier": 0.7,
+        "efficiency_rate": 1.0,
+        "profit_margin_multiplier": 0.0,
         "locked_hourly_rate": null,
-        "hourly_rate": 210.0
+        "hourly_rate": 500.0
     }
 }

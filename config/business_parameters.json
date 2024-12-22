@@ -1,5 +1,6 @@
 {
-    "efficiency_rate": 0.8,
-    "profit_margin_multiplier": 0.7,
-    "hourly_rate": 210
+    "efficiency_rate": 1,
+    "profit_margin_multiplier": 0,
+    "hourly_rate": 500,
+    "preserve_lock_state": true
 }
