@@ -1,4 +1,4 @@
-# Plumbing Dashboard v1.0.0
+# Plumbing Dashboard v1.1.0
 
 A comprehensive web-based dashboard for managing plumbing business operations. This application helps track jobs, manage customer information, and handle scheduling for plumbing services.
 
@@ -69,7 +69,7 @@ Plumbing-Dashboard/
 
 ## Contributing
 
-This is a private project. Please contact the repository owner for contribution guidelines.
+This project is maintained by Christopher Hayes Pierce. For contribution guidelines, please contact the repository owner.
 
 ## License
 
