@@ -1,0 +1,19 @@
+{
+    "overhead_costs": {
+        "glue": 11,
+        "insurance": 600,
+        "marketing": 1600,
+        "misc_expenses": 1000,
+        "rent": 1506,
+        "tools_equipment": 1000,
+        "utilities": 500,
+        "employee_wages": 47040.0,
+        "vehicle_expenses": 1400.0
+    },
+    "business_parameters": {
+        "efficiency_rate": 0.45,
+        "profit_margin_multiplier": 0.55,
+        "locked_hourly_rate": null,
+        "hourly_rate": 245.0
+    }
+}

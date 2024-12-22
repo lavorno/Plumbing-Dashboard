@@ -1,0 +1,499 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container my-4">
+    <div class="card bg-dark text-white">
+        <div class="card-body">
+            <h5 class="card-title text-purple mb-4">
+                <i class="fas fa-hard-hat"></i> Employees
+            </h5>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div class="sort-buttons">
+                    <button type="button" class="btn btn-outline-primary btn-sm" onclick="sortEmployees('name')">
+                        <i class="fas fa-sort-alpha-down"></i> Sort by Name
+                    </button>
+                    <button type="button" class="btn btn-outline-primary btn-sm" onclick="sortEmployees('date')">
+                        <i class="fas fa-sort-numeric-down"></i> Sort by Date
+                    </button>
+                </div>
+                <button type="button" class="btn btn-primary" onclick="showAddEmployeeModal()">
+                    <i class="fas fa-user-plus"></i> Add New Employee
+                </button>
+            </div>
+
+            <div class="expense-group">
+                <div class="table-responsive">
+                    <table class="table table-dark mb-0">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Phone</th>
+                                <th>Email</th>
+                                <th>Position</th>
+                                <th>Hours/Week</th>
+                                <th>Hourly Rate</th>
+                                <th>Monthly Wage</th>
+                                <th class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="employeeTableBody">
+                            <!-- Employees will be added here dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add/Edit Employee Modal -->
+<div class="modal fade" id="employeeModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content bg-dark text-white">
+            <div class="modal-header border-0">
+                <h5 class="modal-title text-purple">Add New Employee</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="employeeForm">
+                <div class="modal-body">
+                    <div id="employeeFormAlerts"></div>
+                    <input type="hidden" name="employee_id" id="employeeId">
+                    
+                    <div class="expense-group mb-2">
+                        <label class="form-label">Name</label>
+                        <input type="text" class="form-control" name="name" id="employeeName" required placeholder="Employee name">
+                    </div>
+                    <div class="expense-group mb-2">
+                        <label class="form-label">Phone</label>
+                        <input type="tel" class="form-control" name="phone" id="employeePhone" required 
+                               pattern="[0-9-+\s()]*" 
+                               placeholder="Phone number"
+                               title="Please enter a valid phone number">
+                    </div>
+                    <div class="expense-group mb-2">
+                        <label class="form-label">Email</label>
+                        <input type="email" class="form-control" name="email" id="employeeEmail" required placeholder="Email address">
+                    </div>
+                    <div class="expense-group mb-2">
+                        <label class="form-label">Position</label>
+                        <select class="form-control" name="position" id="employeePosition" required>
+                            <option value="">Select position...</option>
+                            <option value="Plumber">Plumber</option>
+                            <option value="Apprentice">Apprentice</option>
+                            <option value="Manager">Manager</option>
+                            <option value="Office Staff">Office Staff</option>
+                        </select>
+                    </div>
+                    <div class="expense-group mb-2">
+                        <label class="form-label">Hours per Week</label>
+                        <input type="number" class="form-control" name="hours_per_week" id="employeeHours" 
+                               required min="1" max="168" step="0.5" value="40"
+                               placeholder="Hours worked per week">
+                    </div>
+                    <div class="expense-group mb-2">
+                        <label class="form-label">Hourly Wage ($)</label>
+                        <input type="number" class="form-control" name="hourly_wage" id="employeeWage" 
+                               required min="0" step="0.01" value="25.00"
+                               placeholder="Hourly wage">
+                    </div>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Save Employee</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<style>
+    .expense-group {
+        transition: all 0.3s ease;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 12px;
+        padding: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .expense-group:hover {
+        border-color: rgba(167, 139, 250, 0.5);
+        box-shadow: 0 0 20px rgba(167, 139, 250, 0.1);
+    }
+
+    .form-control {
+        background-color: var(--dark-bg) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        color: white !important;
+    }
+
+    .form-control:focus {
+        background-color: var(--dark-bg) !important;
+        border-color: #a78bfa !important;
+        box-shadow: 0 0 0 2px rgba(167, 139, 250, 0.25) !important;
+        color: white !important;
+    }
+
+    .form-control::placeholder {
+        color: rgba(255, 255, 255, 0.5) !important;
+    }
+
+    .form-control::-webkit-outer-spin-button,
+    .form-control::-webkit-inner-spin-button {
+        appearance: none;
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    /* Firefox */
+    .form-control[type=number] {
+        -moz-appearance: textfield;
+        appearance: textfield;
+    }
+
+    .table {
+        color: var(--text-primary);
+    }
+
+    .table-dark {
+        background-color: transparent;
+    }
+
+    .table th {
+        border-top: none;
+        color: #a78bfa;
+        font-weight: 500;
+        padding: 8px 12px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        background: var(--dark-bg);
+    }
+
+    .table td {
+        padding: 8px 12px;
+        vertical-align: middle;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .table tr:hover td {
+        background: rgba(167, 139, 250, 0.05);
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 8px;
+        justify-content: flex-end;
+    }
+
+    .form-control {
+        background: var(--dark-bg) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        color: white !important;
+        padding: 8px 12px;
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: all 0.2s ease;
+    }
+
+    .form-control:focus {
+        border-color: #a78bfa !important;
+        box-shadow: 0 0 0 2px rgba(167, 139, 250, 0.25) !important;
+    }
+
+    select.form-control {
+        appearance: none;
+        -webkit-appearance: none;
+        background-color: #1f2937;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23a78bfa' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 12px center;
+        padding-right: 32px;
+    }
+
+    .btn {
+        padding: 8px 16px;
+        border-radius: 8px;
+        transition: all 0.2s ease;
+        font-weight: 500;
+    }
+
+    .btn-sm {
+        padding: 6px 10px;
+        font-size: 0.875rem;
+    }
+
+    .sort-buttons .btn {
+        margin-right: 0.5rem;
+        padding: 6px 12px;
+        font-size: 0.875rem;
+    }
+
+    .sort-buttons .btn:last-child {
+        margin-right: 0;
+    }
+
+    .btn-outline-primary {
+        color: #a78bfa;
+        border: 1px solid rgba(167, 139, 250, 0.3);
+    }
+
+    .btn-outline-primary:hover {
+        background: rgba(167, 139, 250, 0.1);
+        color: #c4b5fd;
+        border-color: rgba(167, 139, 250, 0.5);
+    }
+
+    .btn-outline-danger {
+        color: #ef4444;
+        border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .btn-outline-danger:hover {
+        background: rgba(239, 68, 68, 0.1);
+        color: #f87171;
+        border-color: rgba(239, 68, 68, 0.5);
+    }
+
+    .btn-outline-info {
+        color: #0ea5e9;
+        border: 1px solid rgba(14, 165, 233, 0.3);
+    }
+
+    .btn-outline-info:hover {
+        background: rgba(14, 165, 233, 0.1);
+        color: #38bdf8;
+        border-color: rgba(14, 165, 233, 0.5);
+    }
+
+    .btn-outline-secondary {
+        color: #9ca3af;
+        border: 1px solid rgba(156, 163, 175, 0.3);
+    }
+
+    .btn-outline-secondary:hover {
+        background: rgba(156, 163, 175, 0.1);
+        color: #d1d5db;
+        border-color: rgba(156, 163, 175, 0.5);
+    }
+
+    .btn-primary {
+        background: #a78bfa;
+        border: none;
+    }
+
+    .btn-primary:hover {
+        background: #9061f9;
+    }
+
+    .form-label {
+        color: #a78bfa;
+        font-weight: 500;
+        margin-bottom: 6px;
+        font-size: 1rem;
+    }
+
+    .modal-content {
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+    }
+
+    .modal-header {
+        padding: 16px 20px;
+    }
+
+    .modal-body {
+        padding: 16px 20px;
+    }
+
+    .modal-footer {
+        padding: 16px 20px;
+    }
+
+    .alert {
+        border-radius: 8px;
+        border: none;
+        padding: 12px;
+        margin-bottom: 16px;
+    }
+
+    .alert-success {
+        background: rgba(52, 211, 153, 0.1);
+        color: #34d399;
+    }
+
+    .alert-danger {
+        background: rgba(239, 68, 68, 0.1);
+        color: #ef4444;
+    }
+</style>
+
+<script>
+function loadEmployees() {
+    fetch('/get_employees')
+        .then(response => response.json())
+        .then(data => {
+            const tableBody = document.getElementById('employeeTableBody');
+            tableBody.innerHTML = '';
+            
+            data.employees.forEach(employee => {
+                const row = document.createElement('tr');
+                const monthlyWage = employee.hours_per_week * employee.hourly_wage * 4; // 4 weeks per month
+                row.innerHTML = `
+                    <td>${employee.name}</td>
+                    <td>${employee.phone}</td>
+                    <td>${employee.email}</td>
+                    <td>${employee.position}</td>
+                    <td>${employee.hours_per_week} hrs/week</td>
+                    <td>$${employee.hourly_wage.toFixed(2)}/hr</td>
+                    <td>$${monthlyWage.toFixed(2)}/mo</td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="btn btn-sm btn-outline-primary" onclick="editEmployee('${employee.employee_id}')">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger" onclick="deleteEmployee('${employee.employee_id}')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-info" onclick="viewSchedule('${employee.employee_id}', '${employee.name}')">
+                                <i class="fas fa-calendar-alt"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        });
+}
+
+function showAddEmployeeModal() {
+    const modal = document.getElementById('employeeModal');
+    const form = document.getElementById('employeeForm');
+    form.reset();
+    document.getElementById('employeeId').value = '';
+    modal.querySelector('.modal-title').textContent = 'Add New Employee';
+    new bootstrap.Modal(modal).show();
+}
+
+function editEmployee(employeeId) {
+    fetch(`/get_employee/${employeeId}`)
+        .then(response => response.json())
+        .then(data => {
+            const modal = document.getElementById('employeeModal');
+            modal.querySelector('.modal-title').textContent = 'Edit Employee';
+            
+            document.getElementById('employeeId').value = data.employee_id;
+            document.getElementById('employeeName').value = data.name;
+            document.getElementById('employeePhone').value = data.phone;
+            document.getElementById('employeeEmail').value = data.email;
+            document.getElementById('employeePosition').value = data.position;
+            document.getElementById('employeeHours').value = data.hours_per_week;
+            document.getElementById('employeeWage').value = data.hourly_wage;
+            
+            new bootstrap.Modal(modal).show();
+        });
+}
+
+function deleteEmployee(employeeId) {
+    if (confirm('Are you sure you want to delete this employee?')) {
+        fetch(`/delete_employee/${employeeId}`, {
+            method: 'DELETE'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                loadEmployees();
+                showNotification('Employee deleted');
+            } else {
+                showNotification('Failed to delete employee', 'error');
+            }
+        });
+    }
+}
+
+function sortEmployees(by) {
+    const tableBody = document.getElementById('employeeTableBody');
+    const rows = Array.from(tableBody.children);
+    
+    rows.sort((a, b) => {
+        if (by === 'name') {
+            const nameA = a.cells[0].textContent.toLowerCase();
+            const nameB = b.cells[0].textContent.toLowerCase();
+            return nameA.localeCompare(nameB);
+        } else if (by === 'date') {
+            const idA = a.querySelector('.btn').getAttribute('onclick').match(/'([^']+)'/)[1];
+            const idB = b.querySelector('.btn').getAttribute('onclick').match(/'([^']+)'/)[1];
+            return idB.localeCompare(idA);
+        }
+    });
+
+    tableBody.innerHTML = '';
+    rows.forEach((row, index) => {
+        row.style.opacity = '0';
+        tableBody.appendChild(row);
+        setTimeout(() => {
+            row.style.opacity = '1';
+        }, index * 50);
+    });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    loadEmployees();
+    
+    document.getElementById('employeeForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        const data = Object.fromEntries(formData);
+        const isEdit = data.employee_id;
+        
+        fetch(isEdit ? `/update_employee/${data.employee_id}` : '/add_employee', {
+            method: isEdit ? 'PUT' : 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                bootstrap.Modal.getInstance(document.getElementById('employeeModal')).hide();
+                loadEmployees();
+                showNotification(`Employee ${isEdit ? 'updated' : 'added'}`);
+            }
+        })
+        .catch(error => {
+            showNotification('Failed to save employee', 'error');
+        });
+    });
+});
+
+function formatCurrency(amount) {
+    return new Intl.NumberFormat('en-US', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    }).format(amount);
+}
+
+function formatNumber(number) {
+    return new Intl.NumberFormat('en-US').format(number);
+}
+
+function createEmployeeRow(employee) {
+    const monthlyWages = employee.hours_per_week * employee.hourly_wage * 4;
+    return `
+        <tr>
+            <td>${employee.name}</td>
+            <td>${employee.position}</td>
+            <td>${formatNumber(employee.hours_per_week)}</td>
+            <td>$${formatCurrency(employee.hourly_wage)}</td>
+            <td>$${formatCurrency(monthlyWages)}</td>
+            <td>
+                <button class="btn btn-outline-primary btn-sm" onclick="editEmployee('${employee.employee_id}')">
+                    <i class="fas fa-edit"></i>
+                </button>
+                <button class="btn btn-outline-danger btn-sm" onclick="deleteEmployee('${employee.employee_id}')">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </td>
+        </tr>
+    `;
+}
+</script>
+{% endblock %} 

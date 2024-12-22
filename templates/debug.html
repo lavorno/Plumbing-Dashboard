@@ -1,0 +1,231 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container my-4">
+    <div class="card bg-dark text-white mb-4">
+        <div class="card-body">
+            <h5 class="card-title text-purple">
+                <i class="fas fa-bug"></i> Debug Panel
+            </h5>
+            <div class="alert alert-info">
+                This panel shows all calculations and data used in the dashboard.
+            </div>
+        </div>
+    </div>
+
+    <!-- Raw Data Section -->
+    <div class="card bg-dark text-white mb-4">
+        <div class="card-body">
+            <h5 class="card-title text-purple mb-3">Raw Data</h5>
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="debug-box">
+                        <h6 class="text-purple">Business Parameters</h6>
+                        <pre id="businessParams" class="debug-pre"></pre>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="debug-box">
+                        <h6 class="text-purple">Monthly Expenses</h6>
+                        <pre id="expenses" class="debug-pre"></pre>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="debug-box">
+                        <h6 class="text-purple">Calculated Metrics</h6>
+                        <pre id="metrics" class="debug-pre"></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Calculation Breakdown -->
+    <div class="card bg-dark text-white">
+        <div class="card-body">
+            <h5 class="card-title text-purple mb-3">Calculation Breakdown</h5>
+            
+            <div class="calculation-box mb-4">
+                <h6 class="text-purple">1. Total Monthly Expenses</h6>
+                <div id="expensesCalc" class="formula-box">
+                    <!-- Will be populated by JS -->
+                </div>
+            </div>
+
+            <div class="calculation-box mb-4">
+                <h6 class="text-purple">2. Billable Hours Calculation</h6>
+                <div id="hoursCalc" class="formula-box">
+                    <!-- Will be populated by JS -->
+                </div>
+            </div>
+
+            <div class="calculation-box mb-4">
+                <h6 class="text-purple">3. Cost Per Billable Hour</h6>
+                <div id="costCalc" class="formula-box">
+                    <!-- Will be populated by JS -->
+                </div>
+            </div>
+
+            <div class="calculation-box mb-4">
+                <h6 class="text-purple">4. Hourly Rate Calculation</h6>
+                <div id="rateCalc" class="formula-box">
+                    <!-- Will be populated by JS -->
+                </div>
+            </div>
+
+            <div class="calculation-box">
+                <h6 class="text-purple">5. Revenue and Profit Projections</h6>
+                <div id="projectionCalc" class="formula-box">
+                    <!-- Will be populated by JS -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.debug-box {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 15px;
+    border: 1px solid rgba(167, 139, 250, 0.2);
+}
+
+.debug-pre {
+    color: #10b981;
+    font-family: monospace;
+    white-space: pre-wrap;
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+.calculation-box {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    padding: 20px;
+    border: 1px solid rgba(167, 139, 250, 0.2);
+}
+
+.formula-box {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 6px;
+    padding: 15px;
+    font-family: monospace;
+    color: #10b981;
+    margin-top: 10px;
+}
+
+.formula-step {
+    margin-bottom: 10px;
+    padding-left: 20px;
+    position: relative;
+}
+
+.formula-step:before {
+    content: "→";
+    position: absolute;
+    left: 0;
+    color: #a78bfa;
+}
+
+.formula-result {
+    color: #f59e0b;
+    font-weight: bold;
+}
+
+.alert-info {
+    background: rgba(167, 139, 250, 0.1);
+    border: 1px solid rgba(167, 139, 250, 0.2);
+    color: #a78bfa;
+}
+</style>
+
+{% block scripts %}
+<script>
+function formatCurrency(amount) {
+    return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD'
+    }).format(amount);
+}
+
+function formatNumber(num) {
+    return new Intl.NumberFormat('en-US', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    }).format(num);
+}
+
+function updateDebugPanel() {
+    fetch('/get_dashboard_data')
+        .then(response => response.json())
+        .then(data => {
+            // Update raw data sections
+            document.getElementById('businessParams').textContent = 
+                JSON.stringify(data.business_parameters, null, 2);
+            document.getElementById('expenses').textContent = 
+                JSON.stringify(data.overhead_costs, null, 2);
+            document.getElementById('metrics').textContent = 
+                JSON.stringify(data.metrics, null, 2);
+
+            // Calculate total expenses
+            const totalExpenses = Object.values(data.overhead_costs)
+                .reduce((sum, value) => sum + parseFloat(value), 0);
+
+            // Update calculation breakdowns
+            document.getElementById('expensesCalc').innerHTML = Object.entries(data.overhead_costs)
+                .map(([key, value]) => `<div class="formula-step">${key}: ${formatCurrency(value)}</div>`)
+                .join('') +
+                `<div class="formula-step formula-result">Total Monthly Expenses = ${formatCurrency(totalExpenses)}</div>`;
+
+            const availableHours = data.business_parameters.available_hours;
+            const efficiencyRate = data.business_parameters.efficiency_rate;
+            const billableHours = availableHours * efficiencyRate;
+
+            document.getElementById('hoursCalc').innerHTML = `
+                <div class="formula-step">Available Hours (From Trucks) = ${formatNumber(availableHours)} hours/month</div>
+                <div class="formula-step">Efficiency Rate = ${(efficiencyRate * 100).toFixed(0)}%</div>
+                <div class="formula-step">Billable Hours = Available Hours × Efficiency Rate</div>
+                <div class="formula-step formula-result">Billable Hours = ${formatNumber(billableHours)} hours/month</div>
+            `;
+
+            const costPerHour = totalExpenses / billableHours;
+            document.getElementById('costCalc').innerHTML = `
+                <div class="formula-step">Cost Per Hour = Total Monthly Expenses ÷ Billable Hours</div>
+                <div class="formula-step">Cost Per Hour = ${formatCurrency(totalExpenses)} ÷ ${formatNumber(billableHours)}</div>
+                <div class="formula-step formula-result">Cost Per Billable Hour = ${formatCurrency(costPerHour)}</div>
+            `;
+
+            const profitMargin = 1 - data.business_parameters.profit_margin_multiplier;
+            const hourlyRate = costPerHour / data.business_parameters.profit_margin_multiplier;
+            document.getElementById('rateCalc').innerHTML = `
+                <div class="formula-step">Desired Profit Margin = ${(profitMargin * 100).toFixed(0)}%</div>
+                <div class="formula-step">Hourly Rate = Cost Per Hour ÷ (1 - Profit Margin)</div>
+                <div class="formula-step">Hourly Rate = ${formatCurrency(costPerHour)} ÷ ${formatNumber(1 - profitMargin)}</div>
+                <div class="formula-step formula-result">Required Hourly Rate = ${formatCurrency(hourlyRate)}</div>
+            `;
+
+            const monthlyRevenue = hourlyRate * billableHours;
+            const monthlyProfit = monthlyRevenue - totalExpenses;
+            document.getElementById('projectionCalc').innerHTML = `
+                <div class="formula-step">Monthly Revenue = Hourly Rate × Billable Hours</div>
+                <div class="formula-step">Monthly Revenue = ${formatCurrency(hourlyRate)} × ${formatNumber(billableHours)}</div>
+                <div class="formula-step formula-result">Monthly Revenue Potential = ${formatCurrency(monthlyRevenue)}</div>
+                <div class="formula-step">Monthly Profit = Monthly Revenue - Total Expenses</div>
+                <div class="formula-step">Monthly Profit = ${formatCurrency(monthlyRevenue)} - ${formatCurrency(totalExpenses)}</div>
+                <div class="formula-step formula-result">Monthly Profit Potential = ${formatCurrency(monthlyProfit)}</div>
+                <div class="formula-step formula-result">Yearly Revenue Potential = ${formatCurrency(monthlyRevenue * 12)}</div>
+                <div class="formula-step formula-result">Yearly Profit Potential = ${formatCurrency(monthlyProfit * 12)}</div>
+            `;
+        });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    updateDebugPanel();
+    // Update every 30 seconds
+    setInterval(updateDebugPanel, 30000);
+});
+</script>
+{% endblock %}
+{% endblock %} 

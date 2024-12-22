@@ -1,0 +1,104 @@
+{
+    "employees": [
+        {
+            "employee_id": "96ea524a-010d-4f7c-a532-58eaa01de46f",
+            "name": "John Masters",
+            "phone": "903-555-1001",
+            "email": "john.masters@example.com",
+            "position": "Master Plumber",
+            "hours_per_week": 40.0,
+            "hourly_wage": 45.0,
+            "created_at": "2024-01-21T18:16:39.946125"
+        },
+        {
+            "employee_id": "ea6dd5e3-1543-4651-89a4-b3940767108e",
+            "name": "Mike Johnson",
+            "phone": "903-555-1002",
+            "email": "mike.johnson@example.com",
+            "position": "Journeyman Plumber",
+            "hours_per_week": 40.0,
+            "hourly_wage": 35.0,
+            "created_at": "2024-01-21T18:17:37.541556"
+        },
+        {
+            "employee_id": "d1b1a2b5-c882-4e62-9d80-432b3f5f1d8a",
+            "name": "David Wilson",
+            "phone": "903-555-1003",
+            "email": "david.wilson@example.com",
+            "position": "Journeyman Plumber",
+            "hours_per_week": 40.0,
+            "hourly_wage": 32.0,
+            "created_at": "2024-01-21T18:18:45.342125"
+        },
+        {
+            "employee_id": "a7e56739-cb25-4c47-8c4e-a673cf4d7609",
+            "name": "Chris Thompson",
+            "phone": "903-555-1004",
+            "email": "chris.thompson@example.com",
+            "position": "Apprentice Plumber",
+            "hours_per_week": 40.0,
+            "hourly_wage": 22.0,
+            "created_at": "2024-01-21T18:19:22.128445"
+        },
+        {
+            "employee_id": "f93f9cda-1747-4d3a-8df5-6652c5e1b356",
+            "name": "Sarah Davis",
+            "phone": "903-555-1005",
+            "email": "sarah.davis@example.com",
+            "position": "Office Manager",
+            "hours_per_week": 40.0,
+            "hourly_wage": 28.0,
+            "created_at": "2024-01-21T18:20:09.658112"
+        },
+        {
+            "employee_id": "6edb1a97-0e87-4049-bd1b-4d55a5c44c2d",
+            "name": "Robert Brown",
+            "phone": "903-555-1006",
+            "email": "robert.brown@example.com",
+            "position": "Apprentice Plumber",
+            "hours_per_week": 40.0,
+            "hourly_wage": 20.0,
+            "created_at": "2024-01-21T18:21:37.412333"
+        },
+        {
+            "employee_id": "c38f67c1-d6fb-4e36-910e-891215c7e513",
+            "name": "James Martinez",
+            "phone": "903-555-1007",
+            "email": "james.martinez@example.com",
+            "position": "Journeyman Plumber",
+            "hours_per_week": 40.0,
+            "hourly_wage": 33.0,
+            "created_at": "2024-01-21T18:22:15.987342"
+        },
+        {
+            "employee_id": "4e8a30da-dae3-4290-89e6-746983d2b59a",
+            "name": "Tom Anderson",
+            "phone": "903-555-1008",
+            "email": "tom.anderson@example.com",
+            "position": "Apprentice Plumber",
+            "hours_per_week": 40.0,
+            "hourly_wage": 21.0,
+            "created_at": "2024-01-21T18:23:04.643189"
+        },
+        {
+            "employee_id": "db7d3c69-3ed7-4ab5-8120-485e2ab6f6eb",
+            "name": "Lisa Wilson",
+            "phone": "903-555-1009",
+            "email": "lisa.wilson@example.com",
+            "position": "Customer Service",
+            "hours_per_week": 40.0,
+            "hourly_wage": 20.0,
+            "created_at": "2024-01-21T18:24:48.791256"
+        },
+        {
+            "employee_id": "d216f483-b4ed-4bb5-8a1d-94f0b6c97af4",
+            "name": "Mark Harris",
+            "phone": "903-555-1010",
+            "email": "mark.harris@example.com",
+            "position": "Service Manager",
+            "hours_per_week": 40.0,
+            "hourly_wage": 38.0,
+            "created_at": "2024-01-21T18:25:33.021478"
+        }
+    ]
+}

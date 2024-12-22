@@ -1,0 +1,109 @@
+{
+    "trucks": [
+        {
+            "truck_id": "t1-2024-01",
+            "name": "Truck 1",
+            "make": "Ford",
+            "model": "Transit-350",
+            "year": "2024",
+            "license_plate": "TX1001",
+            "employee_ids": [
+                "96ea524a-010d-4f7c-a532-58eaa01de46f",
+                "a7e56739-cb25-4c47-8c4e-a673cf4d7609"
+            ],
+            "effective_hours": 40.0,
+            "loan_payment": 800.0,
+            "insurance": 200.0,
+            "fuel_budget": 400.0,
+            "maintenance_budget": 150.0,
+            "other_expenses": 100.0,
+            "service_area": "North Zone",
+            "notes": "Master Plumber Team",
+            "created_at": "2024-01-21T19:10:15.527399"
+        },
+        {
+            "truck_id": "t2-2024-01",
+            "name": "Truck 2",
+            "make": "Ford",
+            "model": "Transit-250",
+            "year": "2024",
+            "license_plate": "TX1002",
+            "employee_ids": [
+                "ea6dd5e3-1543-4651-89a4-b3940767108e",
+                "6edb1a97-0e87-4049-bd1b-4d55a5c44c2d"
+            ],
+            "effective_hours": 40.0,
+            "loan_payment": 750.0,
+            "insurance": 200.0,
+            "fuel_budget": 400.0,
+            "maintenance_budget": 150.0,
+            "other_expenses": 100.0,
+            "service_area": "South Zone",
+            "notes": "Journeyman Team 1",
+            "created_at": "2024-01-21T19:10:15.527399"
+        },
+        {
+            "truck_id": "t3-2024-01",
+            "name": "Truck 3",
+            "make": "Ford",
+            "model": "Transit-250",
+            "year": "2024",
+            "license_plate": "TX1003",
+            "employee_ids": [
+                "d1b1a2b5-c882-4e62-9d80-432b3f5f1d8a",
+                "4e8a30da-dae3-4290-89e6-746983d2b59a"
+            ],
+            "effective_hours": 40.0,
+            "loan_payment": 750.0,
+            "insurance": 200.0,
+            "fuel_budget": 400.0,
+            "maintenance_budget": 150.0,
+            "other_expenses": 100.0,
+            "service_area": "East Zone",
+            "notes": "Journeyman Team 2",
+            "created_at": "2024-01-21T19:10:15.527399"
+        },
+        {
+            "truck_id": "t4-2024-01",
+            "name": "Truck 4",
+            "make": "Ford",
+            "model": "Transit-250",
+            "year": "2024",
+            "license_plate": "TX1004",
+            "employee_ids": [
+                "c38f67c1-d6fb-4e36-910e-891215c7e513",
+                "d216f483-b4ed-4bb5-8a1d-94f0b6c97af4"
+            ],
+            "effective_hours": 40.0,
+            "loan_payment": 750.0,
+            "insurance": 200.0,
+            "fuel_budget": 400.0,
+            "maintenance_budget": 150.0,
+            "other_expenses": 100.0,
+            "service_area": "West Zone",
+            "notes": "Service Manager Team",
+            "created_at": "2024-01-21T19:10:15.527399"
+        },
+        {
+            "truck_id": "t5-2024-01",
+            "name": "Truck 5",
+            "make": "Ford",
+            "model": "Transit-250",
+            "year": "2024",
+            "license_plate": "TX1005",
+            "employee_ids": [
+                "f93f9cda-1747-4d3a-8df5-6652c5e1b356",
+                "db7d3c69-3ed7-4ab5-8120-485e2ab6f6eb"
+            ],
+            "effective_hours": 40.0,
+            "loan_payment": 750.0,
+            "insurance": 200.0,
+            "fuel_budget": 400.0,
+            "maintenance_budget": 150.0,
+            "other_expenses": 100.0,
+            "service_area": "Central Zone",
+            "notes": "Office Support Team",
+            "created_at": "2024-01-21T19:10:15.527399"
+        }
+    ]
+}

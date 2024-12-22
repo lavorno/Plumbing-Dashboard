@@ -1,0 +1,482 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container my-4">
+    <div class="card bg-dark text-white">
+        <div class="card-body">
+            <h5 class="card-title text-purple mb-4">
+                <i class="fas fa-dollar-sign"></i> Monthly Expenses
+            </h5>
+            <form id="settingsForm">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div class="sort-buttons">
+                                <button type="button" class="btn btn-outline-primary btn-sm" onclick="sortExpenses('name')">
+                                    <i class="fas fa-sort-alpha-down"></i> Sort by Name
+                                </button>
+                                <button type="button" class="btn btn-outline-primary btn-sm" onclick="sortExpenses('amount')">
+                                    <i class="fas fa-sort-numeric-down"></i> Sort by Amount
+                                </button>
+                            </div>
+                            <button type="button" class="btn btn-primary" onclick="addNewExpense()">
+                                <i class="fas fa-plus"></i> Add New Expense
+                            </button>
+                        </div>
+
+                        <div id="all-expenses" class="row g-2">
+                            <!-- All expenses will be added here dynamically -->
+                        </div>
+
+                        <div class="expense-group mt-3" id="total-expenses" style="background: rgba(167, 139, 250, 0.1);">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <strong class="text-purple">Total Monthly Expenses</strong>
+                                <strong class="text-purple">$<span id="expenses-total">0.00</span></strong>
+                            </div>
+                        </div>
+
+                        <div class="mt-3 text-end">
+                            <button type="button" class="btn btn-primary" onclick="saveSettings()">
+                                <i class="fas fa-save"></i> Save Expenses
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<style>
+    .expense-group {
+        transition: all 0.3s ease;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 12px;
+        padding: 8px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        margin-bottom: 0.25rem;
+    }
+
+    .expense-group:hover {
+        border-color: rgba(167, 139, 250, 0.5);
+        box-shadow: 0 0 20px rgba(167, 139, 250, 0.1);
+    }
+
+    .expense-group .input-group {
+        background: transparent;
+        gap: 8px;
+    }
+
+    .expense-group .form-control {
+        background: var(--dark-bg);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: white;
+        padding: 8px 12px;
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: all 0.2s ease;
+    }
+
+    .expense-group .form-control:focus {
+        border-color: #a78bfa;
+        box-shadow: 0 0 0 2px rgba(167, 139, 250, 0.25);
+    }
+
+    .expense-group .input-group-text {
+        background: var(--dark-bg);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: #a78bfa;
+        padding: 8px 12px;
+        border-radius: 8px;
+        font-weight: 500;
+    }
+
+    .expense-group .btn {
+        padding: 8px;
+        border-radius: 8px;
+        transition: all 0.2s ease;
+        min-width: 36px;
+    }
+
+    .expense-info {
+        color: #a78bfa;
+        border: 1px solid rgba(167, 139, 250, 0.3);
+    }
+
+    .expense-info:hover {
+        color: #c4b5fd;
+        background: rgba(167, 139, 250, 0.1);
+        border-color: rgba(167, 139, 250, 0.5);
+    }
+
+    .btn-outline-danger {
+        color: #ef4444;
+        border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .btn-outline-danger:hover {
+        background: rgba(239, 68, 68, 0.1);
+        color: #f87171;
+        border-color: rgba(239, 68, 68, 0.5);
+    }
+
+    .sort-buttons .btn {
+        margin-right: 0.5rem;
+        padding: 6px 12px;
+        font-size: 0.875rem;
+    }
+
+    .sort-buttons .btn:last-child {
+        margin-right: 0;
+    }
+
+    .expense-details {
+        background: var(--dark-bg);
+        border-radius: 8px;
+        padding: 16px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .expense-details textarea {
+        background: rgba(0, 0, 0, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: white;
+        border-radius: 8px;
+        padding: 8px 12px;
+        resize: vertical;
+        min-height: 80px;
+    }
+
+    .expense-details textarea:focus {
+        border-color: #a78bfa;
+        box-shadow: 0 0 0 2px rgba(167, 139, 250, 0.25);
+    }
+
+    .btn-outline-primary {
+        color: #a78bfa;
+        border: 1px solid rgba(167, 139, 250, 0.3);
+    }
+
+    .btn-outline-primary:hover {
+        background: rgba(167, 139, 250, 0.1);
+        color: #c4b5fd;
+        border-color: rgba(167, 139, 250, 0.5);
+    }
+
+    .btn-primary {
+        background: #a78bfa;
+        border: none;
+        padding: 8px 16px;
+        font-weight: 500;
+    }
+
+    .btn-primary:hover {
+        background: #9061f9;
+    }
+
+    .alert {
+        border-radius: 8px;
+        border: none;
+        padding: 12px;
+        margin-bottom: 16px;
+    }
+
+    .alert-success {
+        background: rgba(52, 211, 153, 0.1);
+        color: #34d399;
+    }
+
+    .alert-danger {
+        background: rgba(239, 68, 68, 0.1);
+        color: #ef4444;
+    }
+
+    .form-label {
+        color: #a78bfa;
+        font-weight: 500;
+        margin-bottom: 6px;
+        font-size: 1rem;
+    }
+
+    .popover {
+        background: var(--dark-bg);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .popover-header {
+        background: transparent;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        color: #a78bfa;
+        padding: 12px;
+    }
+
+    .popover-body {
+        padding: 12px;
+        color: white;
+    }
+</style>
+
+<script>
+    // Debounce function to prevent too many updates
+    function debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
+
+    function createExpenseElement(name, value, details = '') {
+        const expenseDiv = document.createElement('div');
+        expenseDiv.className = 'expense-group';
+        const formattedName = name.replace(/_/g, ' ');
+        const capitalizedName = formattedName.split(' ')
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(' ');
+
+        expenseDiv.innerHTML = `
+            <div class="input-group">
+                <input type="text" class="form-control expense-name" 
+                       value="${capitalizedName}"
+                       onchange="updateExpenseName(this)"
+                       data-original-name="${name}">
+                <span class="input-group-text">$</span>
+                <input type="number" class="form-control expense-value" 
+                       value="${value}"
+                       onchange="updateExpenseValue(this)"
+                       onkeyup="updateExpenseValue(this)"
+                       step="0.01"
+                       min="0">
+                <button type="button" class="btn expense-info" 
+                        onclick="toggleExpenseDetails(this)"
+                        data-bs-toggle="popover"
+                        data-bs-placement="left"
+                        data-bs-content="${details}">
+                    <i class="fas fa-info-circle"></i>
+                </button>
+                <button type="button" class="btn btn-outline-danger" onclick="removeExpense(this)">
+                    <i class="fas fa-trash-alt"></i>
+                </button>
+            </div>`;
+
+        return expenseDiv;
+    }
+
+    function addNewExpense() {
+        const allExpenses = document.getElementById('all-expenses');
+        const newExpense = createExpenseElement('new_expense', 0);
+        allExpenses.appendChild(newExpense);
+        initializePopovers();
+        updateTotal();
+    }
+
+    function removeExpense(button) {
+        button.closest('.expense-group').remove();
+        updateTotal();
+        saveSettings();
+    }
+
+    function updateExpenseName(input) {
+        const originalName = input.dataset.originalName;
+        const newName = input.value.toLowerCase().replace(/ /g, '_');
+        input.dataset.originalName = newName;
+        saveSettings();
+    }
+
+    const updateExpenseValue = debounce(function(input) {
+        input.value = parseFloat(input.value || 0).toFixed(2);
+        updateTotal();
+        saveSettings();
+    }, 500);
+
+    function updateTotal() {
+        try {
+            const expenseInputs = document.querySelectorAll('.expense-value');
+            let total = 0;
+            
+            expenseInputs.forEach(input => {
+                const value = parseFloat(input.value || 0);
+                if (!isNaN(value)) {
+                    total += value;
+                }
+            });
+            
+            const totalElement = document.getElementById('expenses-total');
+            if (totalElement) {
+                totalElement.textContent = total.toFixed(2);
+                console.log('New total:', total.toFixed(2)); // Debug log
+            }
+        } catch (error) {
+            console.error('Error updating total:', error);
+        }
+    }
+
+    function toggleExpenseDetails(button) {
+        // Initialize popover if not already initialized
+        if (!button._popover) {
+            new bootstrap.Popover(button);
+        }
+    }
+
+    function initializePopovers() {
+        const popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
+        popoverTriggerList.map(function (popoverTriggerEl) {
+            return new bootstrap.Popover(popoverTriggerEl);
+        });
+    }
+
+    function sortExpenses(by) {
+        const allExpenses = document.getElementById('all-expenses');
+        const expenses = Array.from(allExpenses.children);
+
+        expenses.sort((a, b) => {
+            if (by === 'name') {
+                const nameA = a.querySelector('.expense-name').value.toLowerCase();
+                const nameB = b.querySelector('.expense-name').value.toLowerCase();
+                return nameA.localeCompare(nameB);
+            } else if (by === 'amount') {
+                const amountA = parseFloat(a.querySelector('.expense-value').value || 0);
+                const amountB = parseFloat(b.querySelector('.expense-value').value || 0);
+                return amountB - amountA;
+            }
+        });
+
+        expenses.forEach(expense => allExpenses.appendChild(expense));
+    }
+
+    function saveSettings() {
+        const expenses = {};
+        document.querySelectorAll('.expense-group').forEach(group => {
+            const nameInput = group.querySelector('.expense-name');
+            const valueInput = group.querySelector('.expense-value');
+            if (nameInput && valueInput) {
+                const name = nameInput.value.toLowerCase().replace(/ /g, '_');
+                expenses[name] = parseFloat(valueInput.value || 0);
+            }
+        });
+
+        // Get the current employee_wages value before saving
+        fetch('/get_settings')
+            .then(response => response.json())
+            .then(data => {
+                // Preserve the employee_wages value
+                if (data.overhead_costs && data.overhead_costs.employee_wages !== undefined) {
+                    expenses.employee_wages = data.overhead_costs.employee_wages;
+                }
+
+                // Save the complete expenses object
+                fetch('/update_settings', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        overhead_costs: expenses
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showAlert('success', 'Settings saved successfully!');
+                    } else {
+                        showAlert('danger', 'Error saving settings');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showAlert('danger', 'Error saving settings');
+                });
+            })
+            .catch(error => {
+                console.error('Error getting current settings:', error);
+                showAlert('danger', 'Error saving settings');
+            });
+    }
+
+    function showAlert(type, message) {
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+        alertDiv.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        
+        const container = document.querySelector('.container');
+        container.insertBefore(alertDiv, container.firstChild);
+        
+        // Auto-dismiss after 3 seconds
+        setTimeout(() => {
+            alertDiv.remove();
+        }, 3000);
+    }
+
+    // Load initial expenses
+    fetch('/get_settings')
+        .then(response => response.json())
+        .then(data => {
+            const allExpenses = document.getElementById('all-expenses');
+            allExpenses.innerHTML = ''; // Clear existing expenses
+            
+            const expenses = data.overhead_costs || {};
+            console.log('Loaded expenses:', expenses); // Debug log
+            
+            // Filter out employee_wages from the expenses
+            const filteredExpenses = Object.entries(expenses).filter(([name]) => name !== 'employee_wages');
+            
+            if (filteredExpenses.length === 0) {
+                showAlert('info', 'No expenses found. Add your first expense!');
+            } else {
+                filteredExpenses.forEach(([name, value]) => {
+                    if (name && value !== undefined) {
+                        console.log(`Creating expense: ${name} = ${value}`); // Debug log
+                        const expenseElement = createExpenseElement(name, value);
+                        allExpenses.appendChild(expenseElement);
+                    }
+                });
+                
+                // Calculate and show total after all expenses are added
+                setTimeout(() => {
+                    updateTotal();
+                    console.log('Total updated'); // Debug log
+                }, 100);
+            }
+            
+            initializePopovers();
+        })
+        .catch(error => {
+            console.error('Error loading settings:', error);
+            // Only show error message if we failed to load any data
+            const allExpenses = document.getElementById('all-expenses');
+            if (!allExpenses.children.length) {
+                showAlert('danger', 'Error loading settings. Please try again.');
+                
+                // Load default expenses if there's an error (excluding employee_wages)
+                const defaultExpenses = {
+                    'rent': 2000,
+                    'utilities': 500,
+                    'insurance': 1000,
+                    'tools_equipment': 500,
+                    'vehicle_expenses': 800,
+                    'marketing': 400,
+                    'misc_expenses': 300
+                };
+                
+                Object.entries(defaultExpenses).forEach(([name, value]) => {
+                    const expenseElement = createExpenseElement(name, value);
+                    allExpenses.appendChild(expenseElement);
+                });
+                
+                initializePopovers();
+                updateTotal();
+            }
+        });
+</script>
+{% endblock %} 

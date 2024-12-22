@@ -1,0 +1,1118 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Top Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-dark text-white h-100">
+                <div class="card-body">
+                    <h6 class="card-title text-purple">Billable Hours</h6>
+                    <h3 class="card-text"><span id="billable-hours">0</span></h3>
+                    <small class="text-muted">hours per month</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-dark text-white h-100">
+                <div class="card-body">
+                    <h6 class="card-title text-purple">Hourly Rate</h6>
+                    <div class="rate-container">
+                        <div class="current-rate">
+                            <h3 class="card-text">$<span id="hourly-rate">0.00</span></h3>
+                            <button id="rate-lock-btn" class="btn btn-sm btn-outline-purple">
+                                <i class="fas fa-lock-open"></i>
+                            </button>
+                        </div>
+                        <div class="recommended-rate">
+                            <small class="text-muted">Recommended: $<span id="recommended-rate">0.00</span></small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-dark text-white h-100">
+                <div class="card-body">
+                    <h6 class="card-title text-purple">Cost Per Hour</h6>
+                    <h3 class="card-text">$<span id="cost-per-hour">0.00</span></h3>
+                    <small class="text-muted">per billable hour</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-dark text-white h-100">
+                <div class="card-body">
+                    <h6 class="card-title text-purple">Total Expenses</h6>
+                    <h3 class="card-text">$<span id="total-expenses">0.00</span></h3>
+                    <small class="text-muted">monthly expenses</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Revenue and Profit Cards -->
+    <div class="row mb-4">
+        <!-- Monthly Revenue and Profit -->
+        <div class="col-md-6">
+            <div class="card bg-dark text-white">
+                <div class="card-body">
+                    <h5 class="card-title text-purple">Monthly Projections</h5>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <h6 class="text-muted">Revenue Potential</h6>
+                                <h3 class="text-success">$<span id="monthly-revenue">0.00</span></h3>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <h6 class="text-muted">Profit Potential</h6>
+                                <h3 class="text-success">$<span id="monthly-profit">0.00</span></h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Yearly Revenue and Profit -->
+        <div class="col-md-6">
+            <div class="card bg-dark text-white">
+                <div class="card-body">
+                    <h5 class="card-title text-purple">Yearly Projections</h5>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <h6 class="text-muted">Revenue Potential</h6>
+                                <h3 class="text-success">$<span id="yearly-revenue">0.00</span></h3>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <h6 class="text-muted">Profit Potential</h6>
+                                <h3 class="text-success">$<span id="yearly-profit">0.00</span></h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Business Details -->
+    <div class="row flex-grow-1">
+        <!-- Monthly Expenses -->
+        <div class="col-md-6">
+            <div class="card bg-dark text-white dashboard-card monthly-expenses">
+                <div class="card-body">
+                    <h5 class="card-title text-purple mb-3">Monthly Expenses</h5>
+                    <div class="d-flex justify-content-end mb-2">
+                        <button type="button" class="btn btn-outline-primary btn-sm me-2" onclick="sortExpenses('name')">
+                            <i class="fas fa-sort-alpha-down"></i> Sort by Name
+                        </button>
+                        <button type="button" class="btn btn-outline-primary btn-sm" onclick="sortExpenses('amount')">
+                            <i class="fas fa-sort-numeric-down"></i> Sort by Amount
+                        </button>
+                    </div>
+                    <div class="expenses-table-container">
+                        <div class="table-responsive">
+                            <table class="table table-dark">
+                                <tbody id="expenses-list">
+                                    <!-- Expenses will be populated here -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="expenses-total">
+                            <table class="table table-dark mb-0">
+                                <tbody>
+                                    <tr class="text-purple">
+                                        <td><strong>Total Monthly Expenses</strong></td>
+                                        <td class="text-end"><strong id="expenses-total-value">$0.00</strong></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Service Trucks -->
+        <div class="col-md-6">
+            <div class="card bg-dark text-white dashboard-card service-trucks">
+                <div class="card-body">
+                    <h5 class="card-title text-purple mb-3">Service Trucks</h5>
+                    <div class="trucks-container">
+                        <div id="trucks-overview">
+                            <!-- Trucks will be populated here -->
+                        </div>
+                        <div class="trucks-summary">
+                            <div class="summary-item">
+                                <span class="summary-label">Total Team Size</span>
+                                <span class="summary-value" id="total-employees">0 employees</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="summary-label">Total Weekly Hours</span>
+                                <span class="summary-value" id="total-hours">0 hrs</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="summary-label">Total Monthly Expenses</span>
+                                <span class="summary-value" id="total-truck-expenses">$0.00</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add business parameters sidebar -->
+    <div class="business-parameters-sidebar">
+        <h6>BUSINESS PARAMETERS</h6>
+        <div class="param-item">
+            <div class="param-label">Efficiency Rate</div>
+            <div class="param-control">
+                <div class="slider-container">
+                    <input type="range" 
+                           id="efficiency-rate-input" 
+                           min="0" 
+                           max="100" 
+                           step="5"
+                           class="custom-slider"
+                           oninput="handleSliderInput(this, 'efficiency_rate', value => value / 100)"
+                           value="60">
+                </div>
+                <div class="param-display">60%</div>
+            </div>
+        </div>
+        <div class="param-item">
+            <div class="param-label">Profit Margin</div>
+            <div class="param-control">
+                <div class="slider-container">
+                    <input type="range" 
+                           id="profit-margin-input" 
+                           min="0" 
+                           max="100" 
+                           step="5"
+                           class="custom-slider"
+                           oninput="handleSliderInput(this, 'profit_margin_multiplier', value => (100 - value) / 100)"
+                           value="60">
+                </div>
+                <div class="param-display">60%</div>
+            </div>
+        </div>
+        <div class="param-item">
+            <div class="param-label">Hourly Rate</div>
+            <div class="param-control">
+                <div class="slider-container">
+                    <input type="range" 
+                           id="hourlyRateSlider" 
+                           min="100" 
+                           max="500" 
+                           step="5"
+                           class="custom-slider"
+                           oninput="handleHourlyRateSlider(this)"
+                           value="285">
+                </div>
+                <div class="param-display">$285</div>
+            </div>
+        </div>
+        <div class="save-button-container">
+            <button id="save-parameters-btn" class="btn btn-outline-purple w-100 mt-3" onclick="saveCurrentParameters()">
+                <i class="fas fa-save"></i> Save Parameters
+            </button>
+        </div>
+    </div>
+</div>
+
+<style>
+.container {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 1rem;
+    position: relative;
+}
+
+.dashboard-card {
+    height: calc(100vh - 420px);
+    min-height: 400px;
+    display: flex;
+    flex-direction: column;
+}
+
+.dashboard-card .card-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.flex-grow-1 {
+    flex-grow: 1;
+}
+
+/* Specific table responsive settings */
+.monthly-expenses .table-responsive,
+.service-trucks .table-responsive {
+    overflow-y: auto;
+    height: calc(100% - 120px);
+    min-height: 200px;
+}
+
+.service-trucks {
+    height: calc(100vh - 420px);
+    min-height: 400px;
+}
+
+.card {
+    margin-bottom: 0;
+}
+
+.debug-icon {
+    bottom: 1rem;
+}
+
+.expenses-table-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    margin-top: 1rem;
+}
+
+.expenses-table-container .table-responsive {
+    flex: 1;
+    overflow-y: auto;
+    min-height: 0;
+    border-bottom: 1px solid rgba(167, 139, 250, 0.2);
+}
+
+.expenses-total {
+    background: var(--dark-bg);
+    border-top: 1px solid rgba(167, 139, 250, 0.2);
+    margin-top: auto;
+    padding: 8px 0;
+}
+
+.expenses-total .table {
+    margin-bottom: 0;
+}
+
+.btn-outline-primary {
+    color: #a78bfa;
+    border: 1px solid rgba(167, 139, 250, 0.3);
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+}
+
+.btn-outline-primary:hover {
+    background: rgba(167, 139, 250, 0.1);
+    color: #c4b5fd;
+    border-color: rgba(167, 139, 250, 0.5);
+}
+
+.service-trucks .card-body {
+    padding-bottom: 16px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.service-trucks .table-responsive {
+    flex-grow: 1;
+    overflow-y: auto;
+}
+
+/* Business parameters sidebar styles */
+.business-parameters-sidebar {
+    position: fixed;
+    right: calc(((100vw - 1320px) / 2) - 247px);
+    top: 82px;
+    background: rgba(17, 24, 39, 0.95);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(167, 139, 250, 0.2);
+    padding: 1.5rem;
+    width: 240px;
+    border-radius: 8px;
+    z-index: 1000;
+}
+
+.business-parameters-sidebar h6 {
+    color: #a78bfa;
+    font-size: 0.75rem;
+    margin-bottom: 1.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    text-align: center;
+    font-weight: 600;
+}
+
+.business-parameters-sidebar .param-item {
+    margin-bottom: 1.25rem;
+}
+
+.business-parameters-sidebar .param-item:last-child {
+    margin-bottom: 0;
+}
+
+.business-parameters-sidebar .param-label {
+    color: #9CA3AF;
+    font-size: 0.75rem;
+    margin-bottom: 0.5rem;
+    text-align: center;
+}
+
+.business-parameters-sidebar .param-control {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+}
+
+.business-parameters-sidebar .form-control {
+    background: rgba(17, 24, 39, 0.5);
+    border: 1px solid rgba(167, 139, 250, 0.2);
+    color: white;
+    width: 80px;
+    height: 32px;
+    padding: 0.25rem;
+    text-align: center;
+    font-size: 1rem;
+    border-radius: 4px;
+}
+
+.business-parameters-sidebar .form-control:focus {
+    background: rgba(17, 24, 39, 0.7);
+    border-color: rgba(167, 139, 250, 0.5);
+    box-shadow: 0 0 0 2px rgba(167, 139, 250, 0.25);
+    color: white;
+    outline: none;
+}
+
+.business-parameters-sidebar .form-control::-webkit-inner-spin-button,
+.business-parameters-sidebar .form-control::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.business-parameters-sidebar .form-control[type=number] {
+    -moz-appearance: textfield;
+    appearance: textfield;
+}
+
+.business-parameters-sidebar .param-display {
+    color: #a78bfa;
+    font-size: 1.25rem;
+    font-weight: 500;
+    min-height: 1.5rem;
+}
+
+.trucks-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    margin-top: 1rem;
+}
+
+#trucks-overview {
+    flex: 1;
+    overflow-y: auto;
+    min-height: 0;
+    padding-right: 0.5rem;
+    margin-right: -0.5rem;
+}
+
+.truck-card {
+    background: rgba(167, 139, 250, 0.1);
+    border: 1px solid rgba(167, 139, 250, 0.2);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+.truck-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+}
+
+.truck-title {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.truck-name {
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: #a78bfa;
+}
+
+.truck-details {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.truck-model {
+    font-size: 0.8rem;
+    color: #e2e8f0;
+}
+
+.truck-plate {
+    font-size: 0.8rem;
+    color: #9CA3AF;
+    font-family: monospace;
+    background: rgba(17, 24, 39, 0.5);
+    padding: 0.1rem 0.4rem;
+    border-radius: 4px;
+    border: 1px solid rgba(167, 139, 250, 0.2);
+}
+
+.truck-hours {
+    font-size: 0.9rem;
+    color: #9CA3AF;
+    align-self: flex-start;
+}
+
+.truck-team {
+    font-size: 0.9rem;
+    color: #e2e8f0;
+    margin-bottom: 0.75rem;
+}
+
+.truck-metrics {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 0.75rem;
+}
+
+.metric-item {
+    background: rgba(17, 24, 39, 0.5);
+    padding: 0.75rem;
+    border-radius: 6px;
+}
+
+.metric-item.revenue {
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.metric-item.profit {
+    background: rgba(16, 185, 129, 0.15);
+    border: 1px solid rgba(16, 185, 129, 0.25);
+}
+
+.metric-item.revenue .metric-value,
+.metric-item.profit .metric-value {
+    color: #10B981;
+    font-weight: 500;
+}
+
+.metric-label {
+    font-size: 0.75rem;
+    color: #9CA3AF;
+    margin-bottom: 0.25rem;
+}
+
+.trucks-summary {
+    background: rgba(17, 24, 39, 0.8);
+    border-top: 1px solid rgba(167, 139, 250, 0.2);
+    padding: 1rem;
+    margin-top: auto;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+}
+
+.summary-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.summary-label {
+    font-size: 0.75rem;
+    color: #9CA3AF;
+    margin-bottom: 0.25rem;
+}
+
+.summary-value {
+    font-size: 1rem;
+    color: #a78bfa;
+    font-weight: 500;
+}
+
+/* Animation styles */
+.number-transition {
+    position: relative;
+    display: inline-block;
+    min-width: 60px;
+    text-align: right;
+}
+
+.number-transition.changing::after {
+    content: attr(data-value);
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    opacity: 0;
+    animation: numberFadeIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.number-transition.changing::before {
+    content: attr(data-old-value);
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    opacity: 1;
+    animation: numberFadeOut 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes numberFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.8);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes numberFadeOut {
+    from {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(-20px) scale(0.8);
+    }
+}
+
+.rate-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.current-rate {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.btn-outline-purple {
+    color: #a78bfa;
+    border-color: #a78bfa;
+}
+
+.btn-outline-purple:hover {
+    background-color: #a78bfa;
+    color: #1f2937;
+}
+
+.btn-outline-purple.locked {
+    background-color: #a78bfa;
+    color: #1f2937;
+}
+
+/* Slider styles */
+.slider-container {
+    position: relative;
+    width: 100%;
+    padding: 10px 0;
+}
+
+.custom-slider {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 4px;
+    border-radius: 2px;
+    background: rgba(167, 139, 250, 0.2);
+    outline: none;
+    transition: all 0.2s;
+}
+
+.custom-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #a78bfa;
+    cursor: pointer;
+    border: 2px solid #1f2937;
+    box-shadow: 0 0 0 2px rgba(167, 139, 250, 0.2);
+    transition: all 0.2s;
+}
+
+.custom-slider::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #a78bfa;
+    cursor: pointer;
+    border: 2px solid #1f2937;
+    box-shadow: 0 0 0 2px rgba(167, 139, 250, 0.2);
+    transition: all 0.2s;
+}
+
+.custom-slider:hover::-webkit-slider-thumb {
+    box-shadow: 0 0 0 4px rgba(167, 139, 250, 0.3);
+    transform: scale(1.1);
+}
+
+.custom-slider:hover::-moz-range-thumb {
+    box-shadow: 0 0 0 4px rgba(167, 139, 250, 0.3);
+    transform: scale(1.1);
+}
+
+.custom-slider:active::-webkit-slider-thumb {
+    transform: scale(1.2);
+    background: #c4b5fd;
+}
+
+.custom-slider:active::-moz-range-thumb {
+    transform: scale(1.2);
+    background: #c4b5fd;
+}
+
+.recommended-rate.flash {
+    animation: flashGreen 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes flashGreen {
+    0% {
+        color: #10B981;
+        transform: scale(1.1);
+    }
+    100% {
+        color: #9CA3AF;
+        transform: scale(1);
+    }
+}
+
+.save-button-container {
+    padding: 0 1rem;
+}
+
+#save-parameters-btn {
+    transition: all 0.2s;
+}
+
+#save-parameters-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(167, 139, 250, 0.2);
+}
+</style>
+
+<script>
+    // State management for hourly rate lock
+    let isHourlyRateLocked = false;
+
+    function formatCurrency(amount) {
+        return new Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: 'USD'
+        }).format(amount);
+    }
+
+    function formatNumber(number) {
+        return new Intl.NumberFormat('en-US').format(number);
+    }
+
+    function animateValue(element, newValue) {
+        if (!element) return;
+        
+        // Skip if the value hasn't changed
+        if (element.textContent === newValue) return;
+        
+        // Create wrapper if it doesn't exist
+        let wrapper = element.querySelector('.number-transition');
+        if (!wrapper) {
+            const oldValue = element.textContent;
+            element.textContent = '';
+            wrapper = document.createElement('span');
+            wrapper.className = 'number-transition';
+            wrapper.textContent = oldValue;
+            element.appendChild(wrapper);
+        }
+
+        // Set up animation
+        wrapper.setAttribute('data-old-value', wrapper.textContent);
+        wrapper.setAttribute('data-value', newValue);
+        wrapper.textContent = newValue;
+
+        // Trigger animation
+        wrapper.classList.remove('changing');
+        void wrapper.offsetWidth; // Force reflow
+        wrapper.classList.add('changing');
+
+        // Remove animation class after it's done
+        setTimeout(() => {
+            wrapper.classList.remove('changing');
+        }, 600);
+    }
+
+    // Lock button functionality
+    const rateLockBtn = document.getElementById('rate-lock-btn');
+    
+    rateLockBtn.addEventListener('click', function() {
+        const currentRate = document.getElementById('hourly-rate').textContent;
+        isHourlyRateLocked = !isHourlyRateLocked;
+        
+        // Update button appearance
+        this.innerHTML = isHourlyRateLocked ? 
+            '<i class="fas fa-lock"></i>' : 
+            '<i class="fas fa-lock-open"></i>';
+        this.classList.toggle('locked', isHourlyRateLocked);
+        
+        fetch('/toggle_hourly_rate_lock', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                action: isHourlyRateLocked ? 'lock' : 'unlock',
+                rate: isHourlyRateLocked ? parseFloat(currentRate) : null
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                updateDashboard();
+            }
+        });
+    });
+
+    function handleSliderInput(input, parameter, valueTransform) {
+        const display = input.parentElement.parentElement.querySelector('.param-display');
+        const value = input.value + '%';
+        display.textContent = value;
+        
+        clearTimeout(input.timeout);
+        input.timeout = setTimeout(() => {
+            const transformedValue = valueTransform(parseFloat(input.value));
+            fetch('/update_business_parameter', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    parameter: parameter,
+                    value: transformedValue,
+                    respect_lock: true
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    updateDashboard();
+                    saveCurrentParameters();
+                }
+            });
+        }, 300);
+    }
+
+    function handleHourlyRateSlider(input) {
+        if (isHourlyRateLocked) {
+            // If locked, revert the slider to the locked value
+            const currentRate = document.getElementById('hourly-rate').textContent;
+            input.value = currentRate;
+            const display = input.parentElement.parentElement.querySelector('.param-display');
+            display.textContent = '$' + currentRate;
+            return;
+        }
+
+        const display = input.parentElement.parentElement.querySelector('.param-display');
+        display.textContent = '$' + input.value;
+        
+        clearTimeout(input.timeout);
+        input.timeout = setTimeout(() => {
+            fetch('/update_business_parameter', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    parameter: 'hourly_rate',
+                    value: parseFloat(input.value),
+                    respect_lock: true
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    updateDashboard();
+                    saveCurrentParameters();
+                }
+            });
+        }, 300);
+    }
+
+    function updateDashboard() {
+        Promise.all([
+            fetch('/get_dashboard_data'),
+            fetch('/get_trucks')
+        ])
+        .then(([dashResponse, trucksResponse]) => Promise.all([
+            dashResponse.json(),
+            trucksResponse.json()
+        ]))
+        .then(([dashData, trucksData]) => {
+            // Update top metrics
+            const billableHours = document.getElementById('billable-hours');
+            const hourlyRate = document.getElementById('hourly-rate');
+            const costPerHour = document.getElementById('cost-per-hour');
+            const totalExpensesElement = document.getElementById('total-expenses');
+
+            animateValue(billableHours, dashData.metrics.billable_hours);
+            animateValue(hourlyRate, dashData.metrics.hourly_rate);
+            animateValue(costPerHour, dashData.metrics.cost_per_hour);
+            animateValue(totalExpensesElement, dashData.metrics.total_expenses.replace('$', ''));
+
+            // Update projections
+            const monthlyRevenue = document.getElementById('monthly-revenue');
+            const monthlyProfit = document.getElementById('monthly-profit');
+            const yearlyRevenue = document.getElementById('yearly-revenue');
+            const yearlyProfit = document.getElementById('yearly-profit');
+
+            animateValue(monthlyRevenue, dashData.metrics.monthly_revenue_potential.replace('$', ''));
+            animateValue(monthlyProfit, dashData.metrics.monthly_profit.replace('$', ''));
+            animateValue(yearlyRevenue, dashData.metrics.yearly_revenue_potential.replace('$', ''));
+            animateValue(yearlyProfit, dashData.metrics.yearly_profit.replace('$', ''));
+
+            // Update expenses list
+            const expensesList = document.getElementById('expenses-list');
+            let overhead = {...dashData.overhead_costs};
+            delete overhead.vehicle_expenses;
+            delete overhead.employee_wages;
+
+            expensesList.innerHTML = '';
+            Object.entries(overhead).forEach(([key, value]) => {
+                const formattedKey = key.replace(/_/g, ' ')
+                    .split(' ')
+                    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                    .join(' ');
+                expensesList.innerHTML += `
+                    <tr>
+                        <td>${formattedKey}</td>
+                        <td class="text-end">${formatCurrency(value)}</td>
+                    </tr>
+                `;
+            });
+
+            // Process trucks and expenses
+            let totalTruckExpenses = 0;
+            let totalEmployees = new Set();
+            let totalHours = 0;
+
+            // Update trucks overview
+            const trucksOverview = document.getElementById('trucks-overview');
+            trucksOverview.innerHTML = '';
+
+            trucksData.trucks.forEach(truck => {
+                const weeklyHours = truck.effective_hours || truck.employees.reduce((sum, emp) => sum + parseFloat(emp.hours_per_week), 0);
+                totalHours += weeklyHours;
+                truck.employees.forEach(emp => totalEmployees.add(emp.employee_id));
+
+                const crewWages = truck.employees.reduce((sum, emp) => {
+                    return sum + (parseFloat(emp.hourly_wage) * parseFloat(emp.hours_per_week) * 4);
+                }, 0);
+
+                const truckExpenses = (parseFloat(truck.loan_payment) || 0) +
+                                    (parseFloat(truck.insurance) || 0) +
+                                    (parseFloat(truck.fuel_budget) || 0) +
+                                    (parseFloat(truck.maintenance_budget) || 0) +
+                                    (parseFloat(truck.other_expenses) || 0);
+
+                const totalTruckMonthlyExpenses = truckExpenses + crewWages;
+                totalTruckExpenses += totalTruckMonthlyExpenses;
+
+                // Calculate revenue and profit
+                const monthlyHours = weeklyHours * 4;
+                const monthlyBillableHours = monthlyHours * dashData.business_parameters.efficiency_rate;
+                const revenue = monthlyBillableHours * parseFloat(dashData.metrics.hourly_rate);
+                const profit = revenue - totalTruckMonthlyExpenses;
+
+                trucksOverview.innerHTML += `
+                    <div class="truck-card mb-3">
+                        <div class="truck-header">
+                            <div class="truck-title">
+                                <span class="truck-name">${truck.name}</span>
+                                <div class="truck-details">
+                                    <span class="truck-model">${truck.make || 'N/A'} ${truck.model || ''} ${truck.year || ''}</span>
+                                    <span class="truck-plate">${truck.license_plate || 'No Plate'}</span>
+                                </div>
+                            </div>
+                            <span class="truck-hours">${weeklyHours} hrs/week</span>
+                        </div>
+                        <div class="truck-team">
+                            <i class="fas fa-users"></i> ${truck.employees.map(emp => `${emp.name} (${emp.position})`).join(', ')}
+                        </div>
+                        <div class="truck-metrics">
+                            <div class="metric-item revenue">
+                                <div class="metric-label">Revenue Potential</div>
+                                <div class="metric-value">${formatCurrency(revenue)}</div>
+                            </div>
+                            <div class="metric-item profit">
+                                <div class="metric-label">Profit Potential</div>
+                                <div class="metric-value">${formatCurrency(profit)}</div>
+                            </div>
+                            <div class="metric-item">
+                                <div class="metric-label">Crew Wages</div>
+                                <div class="metric-value">${formatCurrency(crewWages)}</div>
+                            </div>
+                            <div class="metric-item">
+                                <div class="metric-label">Vehicle Expenses</div>
+                                <div class="metric-value">${formatCurrency(truckExpenses)}</div>
+                            </div>
+                            <div class="metric-item">
+                                <div class="metric-label">Total Monthly Expenses</div>
+                                <div class="metric-value">${formatCurrency(totalTruckMonthlyExpenses)}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            // Update truck summary
+            const totalExpenses = totalTruckExpenses + Object.values(overhead).reduce((sum, value) => sum + parseFloat(value), 0);
+            document.getElementById('expenses-total-value').textContent = formatCurrency(totalExpenses);
+            document.getElementById('total-employees').textContent = `${totalEmployees.size} employees`;
+            document.getElementById('total-hours').textContent = `${totalHours} hrs`;
+            document.getElementById('total-truck-expenses').textContent = formatCurrency(totalTruckExpenses);
+
+            // Update business parameters
+            const efficiencyRate = Math.round(dashData.business_parameters.efficiency_rate * 100);
+            const profitMargin = Math.round((1 - dashData.business_parameters.profit_margin_multiplier) * 100);
+            
+            const efficiencyInput = document.getElementById('efficiency-rate-input');
+            const profitMarginInput = document.getElementById('profit-margin-input');
+            const hourlyRateSlider = document.getElementById('hourlyRateSlider');
+            
+            if (efficiencyInput && efficiencyInput.nextElementSibling) {
+                efficiencyInput.value = efficiencyRate;
+                efficiencyInput.nextElementSibling.textContent = efficiencyRate + '%';
+            }
+            
+            if (profitMarginInput && profitMarginInput.nextElementSibling) {
+                profitMarginInput.value = profitMargin;
+                profitMarginInput.nextElementSibling.textContent = profitMargin + '%';
+            }
+
+            if (hourlyRateSlider && !isHourlyRateLocked) {
+                hourlyRateSlider.value = parseFloat(dashData.metrics.hourly_rate);
+                const display = hourlyRateSlider.parentElement.parentElement.querySelector('.param-display');
+                if (display) {
+                    display.textContent = '$' + dashData.metrics.hourly_rate;
+                }
+            }
+
+            const hourlyRateElement = document.getElementById('hourly-rate');
+            const recommendedRateElement = document.getElementById('recommended-rate');
+            const lockButton = document.getElementById('rate-lock-btn');
+            
+            // Update rates
+            hourlyRateElement.textContent = dashData.metrics.hourly_rate.replace('$', '');
+            recommendedRateElement.textContent = dashData.metrics.recommended_rate.replace('$', '');
+            
+            // Update lock button state and sync with our local state
+            isHourlyRateLocked = dashData.metrics.is_rate_locked;
+            if (isHourlyRateLocked) {
+                lockButton.innerHTML = '<i class="fas fa-lock"></i>';
+                lockButton.classList.add('locked');
+            } else {
+                lockButton.innerHTML = '<i class="fas fa-lock-open"></i>';
+                lockButton.classList.remove('locked');
+            }
+        })
+        .catch(error => {
+            console.error('Error updating dashboard:', error);
+        });
+    }
+
+    function saveCurrentParameters() {
+        const parameters = {
+            efficiency_rate: parseFloat(document.getElementById('efficiency-rate-input').value) / 100,
+            profit_margin_multiplier: (100 - parseFloat(document.getElementById('profit-margin-input').value)) / 100,
+            hourly_rate: parseFloat(document.getElementById('hourlyRateSlider').value)
+        };
+        
+        const saveButton = document.getElementById('save-parameters-btn');
+        const originalText = saveButton.innerHTML;
+        saveButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+        
+        fetch('/save_business_parameters', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(parameters)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                saveButton.innerHTML = '<i class="fas fa-check"></i> Saved!';
+                setTimeout(() => {
+                    saveButton.innerHTML = originalText;
+                }, 2000);
+                updateDashboard();
+            } else {
+                console.error('Failed to save parameters:', data.error);
+                saveButton.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Error';
+                setTimeout(() => {
+                    saveButton.innerHTML = originalText;
+                }, 2000);
+            }
+        })
+        .catch(error => {
+            console.error('Error saving parameters:', error);
+            saveButton.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Error';
+            setTimeout(() => {
+                saveButton.innerHTML = originalText;
+            }, 2000);
+        });
+    }
+
+    // Initialize dashboard
+    document.addEventListener('DOMContentLoaded', () => {
+        updateDashboard();
+    });
+
+    // Update dashboard every 30 seconds
+    setInterval(updateDashboard, 30000);
+
+    function sortExpenses(by) {
+        const expensesList = document.getElementById('expenses-list');
+        const rows = Array.from(expensesList.children);
+        
+        rows.sort((a, b) => {
+            if (by === 'name') {
+                const nameA = a.cells[0].textContent.toLowerCase();
+                const nameB = b.cells[0].textContent.toLowerCase();
+                return nameA.localeCompare(nameB);
+            } else if (by === 'amount') {
+                const amountA = parseFloat(a.cells[1].textContent.replace(/[^0-9.-]+/g, ''));
+                const amountB = parseFloat(b.cells[1].textContent.replace(/[^0-9.-]+/g, ''));
+                return amountB - amountA;
+            }
+        });
+        
+        expensesList.innerHTML = '';
+        rows.forEach(row => expensesList.appendChild(row));
+    }
+</script>
+{% endblock %} 
