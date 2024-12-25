@@ -420,14 +420,16 @@
     flex-direction: column;
     overflow: hidden;
     margin-top: 1rem;
+    padding: 0 0.5rem;
 }
 
 #trucks-overview {
     flex: 1;
     overflow-y: auto;
     min-height: 0;
-    padding-right: 0.5rem;
-    margin-right: -0.5rem;
+    margin: 0 -0.5rem;
+    padding: 0 1rem 0.5rem 0.5rem;
+    max-height: calc(100% - 60px);
 }
 
 .truck-card {
@@ -492,14 +494,19 @@
 
 .truck-metrics {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    grid-template-columns: repeat(3, 1fr);
     gap: 0.75rem;
+    margin: 1rem -0.5rem;
+    padding: 0 0.5rem;
 }
 
 .metric-item {
     background: rgba(17, 24, 39, 0.5);
     padding: 0.75rem;
     border-radius: 6px;
+    border: 1px solid rgba(167, 139, 250, 0.2);
+    text-align: center;
+    min-width: 0;
 }
 
 .metric-item.revenue {
@@ -527,14 +534,19 @@
 .trucks-summary {
     background: rgba(17, 24, 39, 0.8);
     border-top: 1px solid rgba(167, 139, 250, 0.2);
-    padding: 1rem;
-    margin-top: auto;
+    padding: 0.5rem;
+    margin: 0 -0.5rem;
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 1rem;
+    gap: 0.5rem;
+    height: 60px;
 }
 
 .summary-item {
+    background: rgba(17, 24, 39, 0.5);
+    padding: 0.35rem;
+    border-radius: 4px;
+    border: 1px solid rgba(167, 139, 250, 0.2);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -542,14 +554,16 @@
 }
 
 .summary-label {
-    font-size: 0.75rem;
+    font-size: 0.65rem;
     color: #9CA3AF;
     margin-bottom: 0.25rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
 
 .summary-value {
-    font-size: 1rem;
-    color: #a78bfa;
+    color: #e2e8f0;
+    font-size: 0.85rem;
     font-weight: 500;
 }
 
@@ -634,7 +648,8 @@
 .slider-container {
     position: relative;
     width: 100%;
-    padding: 10px 0;
+    padding: 10px 8px;
+    margin: 0 -8px;
 }
 
 .custom-slider {
@@ -647,6 +662,8 @@
     background: rgba(167, 139, 250, 0.2);
     outline: none;
     transition: all 0.2s;
+    margin: 0;
+    padding: 0;
 }
 
 .custom-slider::-webkit-slider-thumb {
@@ -736,19 +753,28 @@
     background: rgba(167, 139, 250, 0.1);
     padding: 8px;
     color: #a78bfa;
-    margin-top: 12px;
+    font-weight: 500;
+    border-top: 1px solid rgba(167, 139, 250, 0.2);
 }
 
-.truck-expense-item td {
+.truck-employee td {
     padding: 4px 16px;
     color: #e5e7eb;
+    font-size: 0.9rem;
 }
 
-.truck-expense-subtotal td {
-    border-top: 1px solid rgba(167, 139, 250, 0.2);
-    padding: 8px 16px;
+.truck-employee td:first-child {
+    color: #9CA3AF;
+    font-family: monospace;
+}
+
+.truck-subtotal td {
+    padding: 4px 16px;
     color: #a78bfa;
-    margin-bottom: 12px;
+    font-weight: 500;
+    font-size: 0.9rem;
+    border-bottom: 1px solid rgba(167, 139, 250, 0.1);
+    margin-bottom: 8px;
 }
 
 .expenses-total {
@@ -853,116 +879,582 @@
     transform: translateY(-1px);
     text-shadow: 0 0 8px rgba(167, 139, 250, 0.5);
 }
+
+.employee-item {
+    font-size: 0.85rem;
+    color: #e2e8f0;
+    padding: 0.25rem 0;
+    border-bottom: 1px solid rgba(167, 139, 250, 0.1);
+}
+
+.employee-item:last-child {
+    border-bottom: none;
+}
+
+.truck-metrics {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.75rem;
+    margin: 1rem -0.5rem;
+    padding: 0 0.5rem;
+}
+
+.metric-item {
+    background: rgba(17, 24, 39, 0.5);
+    padding: 0.75rem;
+    border-radius: 6px;
+    border: 1px solid rgba(167, 139, 250, 0.2);
+    text-align: center;
+    min-width: 0;
+}
+
+.metric-item .metric-label {
+    font-size: 0.75rem;
+    color: #9CA3AF;
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.metric-item .metric-value {
+    color: #e2e8f0;
+    font-size: 0.9rem;
+}
+
+.truck-team {
+    font-size: 0.9rem;
+    color: #e2e8f0;
+    margin-bottom: 1rem;
+    line-height: 1.4;
+}
+
+.truck-card {
+    background: rgba(17, 24, 39, 0.8);
+    border: 1px solid rgba(167, 139, 250, 0.2);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    transition: all 0.2s ease;
+}
+
+.truck-card:hover {
+    background: rgba(17, 24, 39, 0.9);
+    border-color: rgba(167, 139, 250, 0.3);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.truck-name {
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: #a78bfa;
+    margin-bottom: 0.25rem;
+}
+
+.truck-details {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.truck-model {
+    font-size: 0.85rem;
+    color: #e2e8f0;
+}
+
+.truck-plate {
+    font-size: 0.85rem;
+    color: #9CA3AF;
+    font-family: monospace;
+    background: rgba(17, 24, 39, 0.5);
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    border: 1px solid rgba(167, 139, 250, 0.2);
+}
+
+.truck-hours {
+    font-size: 0.9rem;
+    color: #a78bfa;
+    font-weight: 500;
+    background: rgba(167, 139, 250, 0.1);
+    padding: 0.25rem 0.75rem;
+    border-radius: 4px;
+    border: 1px solid rgba(167, 139, 250, 0.2);
+}
+
+.truck-team {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(167, 139, 250, 0.1);
+}
+
+.team-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+    font-size: 0.9rem;
+}
+
+.team-size {
+    color: #a78bfa;
+    font-weight: 500;
+}
+
+.service-area {
+    color: #9CA3AF;
+    font-size: 0.85rem;
+}
+
+.team-members {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.employee-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem;
+    background: rgba(17, 24, 39, 0.5);
+    border-radius: 4px;
+    border: 1px solid rgba(167, 139, 250, 0.1);
+}
+
+.employee-name {
+    color: #e2e8f0;
+    font-weight: 500;
+    flex: 1;
+}
+
+.employee-position {
+    color: #9CA3AF;
+    font-size: 0.85rem;
+    margin: 0 1rem;
+}
+
+.employee-wage {
+    color: #a78bfa;
+    font-family: monospace;
+    font-size: 0.9rem;
+    background: rgba(167, 139, 250, 0.1);
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    border: 1px solid rgba(167, 139, 250, 0.2);
+}
+
+.truck-metrics {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.75rem;
+    margin: 1rem -0.5rem;
+    padding: 0 0.5rem;
+}
+
+.metric-item {
+    background: rgba(17, 24, 39, 0.5);
+    padding: 0.75rem;
+    border-radius: 6px;
+    border: 1px solid rgba(167, 139, 250, 0.2);
+    text-align: center;
+    min-width: 0;
+}
+
+.metric-label {
+    font-size: 0.75rem;
+    color: #9CA3AF;
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.metric-value {
+    color: #e2e8f0;
+    font-size: 1rem;
+    font-weight: 500;
+}
 </style>
 
 <script>
-    // State management for hourly rate lock
-    let isHourlyRateLocked = false;
-    let currentHourlyRate = 0;
     let isUpdating = false;
+    let isHourlyRateLocked = false;
 
-    // Lock button functionality
-    const rateLockBtn = document.getElementById('rate-lock-btn');
-    rateLockBtn.addEventListener('click', function() {
-        if (!isUpdating) {
-            toggleRateLock(this);
+    document.addEventListener('DOMContentLoaded', () => {
+        console.log('Initializing dashboard...');
+        
+        // Set up the rate lock button
+        const rateLockBtn = document.getElementById('rate-lock-btn');
+        if (rateLockBtn) {
+            rateLockBtn.addEventListener('click', () => {
+                isHourlyRateLocked = !isHourlyRateLocked;
+        updateLockButtonState();
+            });
         }
+        
+        // Initial dashboard update
+        updateDashboard(true);
+        
+        // Set up periodic updates
+        setInterval(() => updateDashboard(), 30000);
     });
 
     function updateLockButtonState() {
         const lockButton = document.getElementById('rate-lock-btn');
-        if (isHourlyRateLocked) {
-            lockButton.innerHTML = '<i class="fas fa-lock"></i>';
-            lockButton.classList.add('locked');
-        } else {
-            lockButton.innerHTML = '<i class="fas fa-lock-open"></i>';
-            lockButton.classList.remove('locked');
+        if (lockButton) {
+            if (isHourlyRateLocked) {
+                lockButton.innerHTML = '<i class="fas fa-lock"></i>';
+                lockButton.classList.add('locked');
+            } else {
+                lockButton.innerHTML = '<i class="fas fa-lock-open"></i>';
+                lockButton.classList.remove('locked');
+            }
         }
     }
 
-    // Initialize lock state
-    document.addEventListener('DOMContentLoaded', () => {
-        fetch('/get_settings')
+    function updateDashboard(forceUpdate = false) {
+        if (!forceUpdate && isUpdating) return;
+        
+        console.log('Updating dashboard...');
+        isUpdating = true;
+        
+        fetch('/get_dashboard_data')
             .then(response => response.json())
             .then(data => {
-                isHourlyRateLocked = data.business_parameters.locked_hourly_rate !== null;
-                currentHourlyRate = data.business_parameters.hourly_rate;
-                updateLockButtonState();
-                restoreStateFromLocalStorage();
-                updateDashboard();
-            });
-    });
+                console.log('Dashboard data:', data);
+                
+                if (!data.success) {
+                    throw new Error(data.error || 'Failed to load dashboard data');
+                }
+                
+                // Update metrics
+                const metrics = data.metrics;
+                Object.entries(metrics).forEach(([key, value]) => {
+                    const element = document.getElementById(key.replace(/_/g, '-'));
+                    if (element) {
+                        // Remove the dollar sign for margin values
+                        if (key.includes('margin')) {
+                            element.textContent = value;
+                        } else {
+                            element.textContent = value.replace(/^\$/, '');
+                        }
+                        element.style.color = ''; // Reset color
+                        
+                        // Add color coding for margins
+                        if (key.includes('margin')) {
+                            const marginValue = parseFloat(value);
+                            if (marginValue < 0) {
+                                element.style.color = '#ef4444'; // Red for negative
+                            } else if (marginValue < 20) {
+                                element.style.color = '#fbbf24'; // Yellow for low
+                            } else {
+                                element.style.color = '#10B981'; // Green for good
+                            }
+                        }
+                    }
+                });
+                
+                // Update efficiency rate display in billable hours card
+            const billableHoursCard = document.querySelector('.card-body:has(#billable-hours)');
+            if (billableHoursCard) {
+                const smallText = billableHoursCard.querySelector('small.text-muted');
+                if (smallText) {
+                        const efficiencyRate = Math.round(data.business_parameters.efficiency_rate * 100);
+                        smallText.innerHTML = `hours per month <span class="text-purple">(${efficiencyRate}% efficiency)</span>`;
+                    }
+                }
 
-    function saveStateToLocalStorage() {
-        const state = {
-            isHourlyRateLocked,
-            hourlyRate: document.getElementById('hourly-rate').textContent,
-            efficiencyRate: document.getElementById('efficiency-rate-input').value,
-            profitMargin: document.getElementById('profit-margin-input').value
-        };
-        localStorage.setItem('dashboardState', JSON.stringify(state));
+            // Update expenses list
+            const expensesList = document.getElementById('expenses-list');
+                if (expensesList) {
+            expensesList.innerHTML = '';
+
+                    // Group expenses by type
+                    const overheadExpenses = data.expenses.filter(exp => exp.type === 'overhead');
+                    const truckExpenses = data.expenses.filter(exp => ['truck_header', 'truck_employee', 'truck_subtotal'].includes(exp.type));
+
+            // Add overhead expenses
+                    if (overheadExpenses.length > 0) {
+            expensesList.innerHTML += `
+                <tr class="expense-header">
+                                <td colspan="2">Overhead Expenses</td>
+                </tr>
+            `;
+                        overheadExpenses.forEach(expense => {
+                expensesList.innerHTML += `
+                                <tr class="overhead-expense">
+                                    <td>${expense.name}</td>
+                                    <td class="text-end">${expense.amount}</td>
+                    </tr>
+                `;
+            });
+                    }
+                    
+                    // Add truck expenses with employee details
+                    if (truckExpenses.length > 0) {
+                expensesList.innerHTML += `
+                    <tr class="expense-header">
+                                <td colspan="2">Service Truck Expenses</td>
+                    </tr>
+                `;
+                        truckExpenses.forEach(expense => {
+                            let rowClass = '';
+                            switch (expense.type) {
+                                case 'truck_header':
+                                    rowClass = 'truck-expense-header';
+                                    break;
+                                case 'truck_employee':
+                                    rowClass = 'truck-employee';
+                                    break;
+                                case 'truck_subtotal':
+                                    rowClass = 'truck-subtotal';
+                                    break;
+                            }
+                        expensesList.innerHTML += `
+                                <tr class="${rowClass}">
+                                    <td>${expense.name}</td>
+                                    <td class="text-end">${expense.amount}</td>
+                            </tr>
+                        `;
+                    });
+                    }
+                }
+
+            // Update trucks overview
+            const trucksOverview = document.getElementById('trucks-overview');
+                if (trucksOverview && data.trucks) {
+            trucksOverview.innerHTML = '';
+                    let totalEmployees = 0;
+                    let totalHours = 0;
+                    let totalTruckExpenses = 0;
+                    
+                    data.trucks.forEach(truck => {
+                        const truckEmployees = truck.employees || [];
+                        totalEmployees += truckEmployees.length;
+                        totalHours += parseFloat(truck.effective_hours || 0);
+                        
+                        // Calculate total employee expenses for this truck
+                        const employeeExpenses = truckEmployees.reduce((sum, emp) => {
+                            const monthlyWage = parseFloat(emp.hourly_wage) * parseFloat(emp.hours_per_week) * 4;
+                            return sum + monthlyWage;
+                }, 0);
+
+                        const totalTruckCost = parseFloat(truck.total_expenses) + employeeExpenses;
+                        totalTruckExpenses += totalTruckCost;
+
+                trucksOverview.innerHTML += `
+                            <div class="truck-card">
+                        <div class="truck-header">
+                            <div class="truck-title">
+                                        <div class="truck-name">${truck.name}</div>
+                                <div class="truck-details">
+                                            <span class="truck-model">${truck.year} ${truck.make} ${truck.model}</span>
+                                    <span class="truck-plate">${truck.license_plate || 'No Plate'}</span>
+                                </div>
+                            </div>
+                                    <div class="truck-hours">${truck.effective_hours} hrs/week</div>
+                        </div>
+                                
+                        <div class="truck-metrics">
+                            <div class="metric-item">
+                                        <div class="metric-label">Vehicle Expenses</div>
+                                        <div class="metric-value">$${truck.total_expenses.toLocaleString('en-US', {minimumFractionDigits: 2})}</div>
+                            </div>
+                            <div class="metric-item">
+                                        <div class="metric-label">Employee Expenses</div>
+                                        <div class="metric-value">$${employeeExpenses.toLocaleString('en-US', {minimumFractionDigits: 2})}</div>
+                            </div>
+                            <div class="metric-item">
+                                        <div class="metric-label">Total Monthly Cost</div>
+                                        <div class="metric-value">$${totalTruckCost.toLocaleString('en-US', {minimumFractionDigits: 2})}</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="truck-team">
+                                    <div class="team-header">
+                                        <span class="team-size">Team Size: ${truckEmployees.length} employees</span>
+                                        ${truck.service_area ? `<span class="service-area">Service Area: ${truck.service_area}</span>` : ''}
+                                    </div>
+                                    <div class="team-members">
+                                        ${truckEmployees.map(emp => `
+                                            <div class="employee-item">
+                                                <span class="employee-name">${emp.name}</span>
+                                                <span class="employee-position">${emp.position}</span>
+                                                <span class="employee-wage">$${(parseFloat(emp.hourly_wage) * parseFloat(emp.hours_per_week) * 4).toLocaleString('en-US', {minimumFractionDigits: 2})}/mo</span>
+                                            </div>
+                                        `).join('')}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+                    // Update summary
+                    document.getElementById('total-employees').textContent = `${totalEmployees} employees`;
+            document.getElementById('total-hours').textContent = `${totalHours} hrs`;
+                    document.getElementById('total-truck-expenses').textContent = 
+                        `$${totalTruckExpenses.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+                }
+
+            // Update business parameters
+                if (data.business_parameters) {
+                    const params = data.business_parameters;
+                    
+                    // Update efficiency rate slider
+                    const efficiencySlider = document.getElementById('efficiency-rate-input');
+                    if (efficiencySlider) {
+                        const value = Math.round(params.efficiency_rate * 100);
+                        efficiencySlider.value = value;
+                        const display = efficiencySlider.parentElement.parentElement.querySelector('.param-display');
+                        if (display) {
+                            display.textContent = value + '%';
+                        }
+                    }
+                    
+                    // Update profit margin slider
+                    const profitMarginSlider = document.getElementById('profit-margin-input');
+                    if (profitMarginSlider) {
+                        const value = Math.round((1 - params.profit_margin_multiplier) * 100);
+                        profitMarginSlider.value = value;
+                        const display = profitMarginSlider.parentElement.parentElement.querySelector('.param-display');
+                    if (display) {
+                            display.textContent = value + '%';
+                        }
+                    }
+                    
+                    // Update hourly rate if not locked
+                    if (!isHourlyRateLocked) {
+                        const hourlyRateSlider = document.getElementById('hourlyRateSlider');
+                        if (hourlyRateSlider) {
+                            hourlyRateSlider.value = params.hourly_rate;
+                            const display = hourlyRateSlider.parentElement.parentElement.querySelector('.param-display');
+                    if (display) {
+                                display.textContent = '$' + params.hourly_rate;
+                            }
+                        }
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error updating dashboard:', error);
+                
+                // Show error state in UI
+                document.querySelectorAll('[id$="-hours"], [id$="-rate"], [id$="-expenses"], [id$="-revenue"], [id$="-profit"], [id$="-margin"]')
+                    .forEach(element => {
+                        element.textContent = '0.00';
+                        element.style.color = '#ef4444';
+                    });
+                    
+                // Clear expenses and trucks
+                const expensesList = document.getElementById('expenses-list');
+                if (expensesList) {
+                    expensesList.innerHTML = '<tr><td colspan="2" class="text-center text-danger">Failed to load expenses</td></tr>';
+                }
+                
+                const trucksOverview = document.getElementById('trucks-overview');
+                if (trucksOverview) {
+                    trucksOverview.innerHTML = '<div class="text-center text-danger">Failed to load trucks</div>';
+                }
+            })
+            .finally(() => {
+                isUpdating = false;
+            });
     }
 
-    function restoreStateFromLocalStorage() {
-        const savedState = localStorage.getItem('dashboardState');
-        if (!savedState) return;
+    // Add debounce function
+    function debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
 
-        try {
-            const state = JSON.parse(savedState);
-            
-            // Restore lock state
-            if (typeof state.isHourlyRateLocked === 'boolean') {
-                isHourlyRateLocked = state.isHourlyRateLocked;
-                updateLockButtonState();
+    // Debounced update function
+    const debouncedUpdateParameters = debounce((updates) => {
+        fetch('/save_business_parameters', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                ...updates,
+                preserve_lock_state: true
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                console.log('Parameters updated successfully');
+                updateDashboard(true); // Force immediate update
             }
-            
-            const hourlyRateSlider = document.getElementById('hourlyRateSlider');
-            if (hourlyRateSlider && state.hourlyRate) {
-                hourlyRateSlider.value = state.hourlyRate;
-                const display = hourlyRateSlider.parentElement.parentElement.querySelector('.param-display');
-                if (display) {
-                    display.textContent = '$' + state.hourlyRate;
-                }
-                document.getElementById('hourly-rate').textContent = state.hourlyRate;
-            }
+        })
+        .catch(error => {
+            console.error('Error updating parameters:', error);
+        });
+    }, 300); // 300ms debounce
 
-            if (state.efficiencyRate) {
-                const efficiencyInput = document.getElementById('efficiency-rate-input');
-                if (efficiencyInput) {
-                    efficiencyInput.value = state.efficiencyRate;
-                    const display = efficiencyInput.parentElement.parentElement.querySelector('.param-display');
-                    if (display) {
-                        display.textContent = state.efficiencyRate + '%';
-                    }
-                }
-            }
-
-            if (state.profitMargin) {
-                const profitMarginInput = document.getElementById('profit-margin-input');
-                if (profitMarginInput) {
-                    profitMarginInput.value = state.profitMargin;
-                    const display = profitMarginInput.parentElement.parentElement.querySelector('.param-display');
-                    if (display) {
-                        display.textContent = state.profitMargin + '%';
-                    }
-                }
-            }
-        } catch (error) {
-            console.error('Error restoring state:', error);
+    function handleSliderInput(input, parameter, valueTransform) {
+        const value = valueTransform(parseFloat(input.value));
+        const display = input.parentElement.parentElement.querySelector('.param-display');
+        if (display) {
+            display.textContent = input.value + '%';
         }
+        
+        // Update pending changes
+        const updates = {
+            [parameter]: value
+        };
+        
+        // Trigger debounced update
+        debouncedUpdateParameters(updates);
+    }
+
+    function handleSliderRelease(input, parameter, valueTransform) {
+        const value = valueTransform(parseFloat(input.value));
+        
+        // Immediate update on release
+        fetch('/save_business_parameters', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                [parameter]: value,
+                preserve_lock_state: true
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                console.log('Parameters updated successfully');
+                updateDashboard(true); // Force immediate update
+            }
+        })
+        .catch(error => {
+            console.error('Error updating parameters:', error);
+        });
     }
 
     function handleHourlyRateSlider(input) {
         if (isUpdating) return;
         
+        const value = parseFloat(input.value);
         const display = input.parentElement.parentElement.querySelector('.param-display');
-        const hourlyRate = document.getElementById('hourly-rate');
-        const value = input.value;
+        if (display) {
+            display.textContent = '$' + value;
+        }
         
-        // Update UI immediately
-        display.textContent = '$' + value;
-        hourlyRate.textContent = value;
-        currentHourlyRate = value;
+        // Update the hourly rate display
+        const hourlyRateDisplay = document.getElementById('hourly-rate');
+        if (hourlyRateDisplay) {
+            hourlyRateDisplay.textContent = value.toFixed(2);
+        }
         
         // If it's not already locked, lock it
         if (!isHourlyRateLocked) {
@@ -970,534 +1462,9 @@
             updateLockButtonState();
         }
         
-        // Save state to localStorage
-        const state = {
-            isHourlyRateLocked: true,
-            hourlyRate: value,
-            efficiencyRate: document.getElementById('efficiency-rate-input').value,
-            profitMargin: document.getElementById('profit-margin-input').value
-        };
-        localStorage.setItem('dashboardState', JSON.stringify(state));
-        
-        // Debounce the server update
-        clearTimeout(input.timeout);
-        input.timeout = setTimeout(() => {
-            isUpdating = true;
-            fetch('/update_business_parameter', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    parameter: 'hourly_rate',
-                    value: parseFloat(value),
-                    respect_lock: true,
-                    preserve_lock_state: true
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    updateDashboard();
-                    // Ensure lock state persists after dashboard update
-                    isHourlyRateLocked = true;
-                    updateLockButtonState();
-                }
-            })
-            .finally(() => {
-                isUpdating = false;
-            });
-        }, 200);
-    }
-
-    function handleSliderInput(input, parameter, valueTransform) {
-        const display = input.parentElement.parentElement.querySelector('.param-display');
-        const value = input.value;
-        display.textContent = value + '%';
-        
-        // Force sync with dashboard immediately for efficiency rate
-        if (parameter === 'efficiency_rate') {
-            const billableHoursCard = document.querySelector('.card-body:has(#billable-hours)');
-            if (billableHoursCard) {
-                const smallText = billableHoursCard.querySelector('small.text-muted');
-                if (smallText) {
-                    smallText.innerHTML = `hours per month <span class="text-purple">(${value}% efficiency)</span>`;
-                }
-            }
-        }
-        
-        // Debounce the server update
-        clearTimeout(input.timeout);
-        input.timeout = setTimeout(() => {
-            const transformedValue = valueTransform(parseFloat(value));
-            
-            fetch('/update_business_parameter', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    parameter: parameter,
-                    value: transformedValue,
-                    respect_lock: true,
-                    preserve_lock_state: true
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    saveStateToLocalStorage();
-                    if (!isHourlyRateLocked) {
-                        updateDashboard();
-                    }
-                    // Update recommended rate if available
-                    if (data.metrics && data.metrics.recommended_rate) {
-                        const recommendedRateElement = document.getElementById('recommended-rate');
-                        recommendedRateElement.textContent = data.metrics.recommended_rate.replace('$', '');
-                        const recommendedRate = document.querySelector('.recommended-rate');
-                        recommendedRate.classList.remove('flash');
-                        void recommendedRate.offsetWidth;
-                        recommendedRate.classList.add('flash');
-                    }
-                    // Force sync after server update
-                    if (parameter === 'efficiency_rate') {
-                        syncEfficiencyRate();
-                    }
-                }
-            });
-        }, 200);
-    }
-
-    function toggleRateLock(button) {
-        if (isUpdating) return;
-        
-        isUpdating = true;
-        const currentRate = document.getElementById('hourly-rate').textContent;
-        isHourlyRateLocked = !isHourlyRateLocked;
-        
-        updateLockButtonState();
-        
-        // Save to localStorage with both lock state and rate
-        const state = {
-            isHourlyRateLocked,
-            hourlyRate: currentRate,
-            efficiencyRate: document.getElementById('efficiency-rate-input').value,
-            profitMargin: document.getElementById('profit-margin-input').value
-        };
-        localStorage.setItem('dashboardState', JSON.stringify(state));
-        
-        fetch('/toggle_hourly_rate_lock', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                action: isHourlyRateLocked ? 'lock' : 'unlock',
-                rate: isHourlyRateLocked ? parseFloat(currentRate) : null
-            })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                updateDashboard();
-                // Ensure lock state persists after dashboard update
-                isHourlyRateLocked = state.isHourlyRateLocked;
-                updateLockButtonState();
-            }
-        })
-        .finally(() => {
-            isUpdating = false;
-        });
-    }
-
-    function formatCurrency(amount) {
-        return new Intl.NumberFormat('en-US', {
-            style: 'currency',
-            currency: 'USD'
-        }).format(amount);
-    }
-
-    function formatNumber(number) {
-        return new Intl.NumberFormat('en-US').format(number);
-    }
-
-    function animateValue(element, newValue) {
-        if (!element) return;
-        
-        // Skip if the value hasn't changed
-        if (element.textContent === newValue) return;
-        
-        // Create wrapper if it doesn't exist
-        let wrapper = element.querySelector('.number-transition');
-        if (!wrapper) {
-            const oldValue = element.textContent;
-            element.textContent = '';
-            wrapper = document.createElement('span');
-            wrapper.className = 'number-transition';
-            wrapper.textContent = oldValue;
-            element.appendChild(wrapper);
-        }
-
-        // Set up animation
-        wrapper.setAttribute('data-old-value', wrapper.textContent);
-        wrapper.setAttribute('data-value', newValue);
-        wrapper.textContent = newValue;
-
-        // Trigger animation
-        wrapper.classList.remove('changing');
-        void wrapper.offsetWidth; // Force reflow
-        wrapper.classList.add('changing');
-
-        // Remove animation class after it's done
-        setTimeout(() => {
-            wrapper.classList.remove('changing');
-        }, 600);
-    }
-
-    function updateDashboard() {
-        // Store current lock state and rate before update
-        const currentLockState = isHourlyRateLocked;
-        const currentRate = isHourlyRateLocked ? document.getElementById('hourly-rate').textContent : null;
-        const hourlyRateSlider = document.getElementById('hourlyRateSlider');
-        
-        Promise.all([
-            fetch('/get_dashboard_data'),
-            fetch('/get_trucks')
-        ])
-        .then(([dashResponse, trucksResponse]) => Promise.all([
-            dashResponse.json(),
-            trucksResponse.json()
-        ]))
-        .then(([dashData, trucksData]) => {
-            // Update top metrics
-            const billableHours = document.getElementById('billable-hours');
-            const hourlyRate = document.getElementById('hourly-rate');
-            const costPerHour = document.getElementById('cost-per-hour');
-            const totalExpensesElement = document.getElementById('total-expenses');
-            const recommendedRateElement = document.getElementById('recommended-rate');
-
-            // Update the recommended rate display
-            recommendedRateElement.textContent = dashData.metrics.recommended_rate.replace('$', '');
-
-            // Update hourly rate based on lock state
-            if (!isHourlyRateLocked) {
-                // When unlocked, use recommended rate
-                const recommendedRate = dashData.metrics.recommended_rate.replace('$', '');
-                hourlyRate.textContent = recommendedRate;
-                if (hourlyRateSlider) {
-                    hourlyRateSlider.value = recommendedRate;
-                    const display = hourlyRateSlider.parentElement.parentElement.querySelector('.param-display');
-                    if (display) {
-                        display.textContent = '$' + recommendedRate;
-                    }
-                }
-            } else if (currentRate) {
-                // When locked, keep the current rate and ensure slider matches
-                hourlyRate.textContent = currentRate;
-                if (hourlyRateSlider) {
-                    hourlyRateSlider.value = currentRate;
-                    const display = hourlyRateSlider.parentElement.parentElement.querySelector('.param-display');
-                    if (display) {
-                        display.textContent = '$' + currentRate;
-                    }
-                }
-            }
-
-            // Update other metrics
-            animateValue(billableHours, dashData.metrics.billable_hours);
-            const efficiencyPercent = Math.round(dashData.business_parameters.efficiency_rate * 100);
-            const billableHoursCard = document.querySelector('.card-body:has(#billable-hours)');
-            if (billableHoursCard) {
-                const smallText = billableHoursCard.querySelector('small.text-muted');
-                if (smallText) {
-                    smallText.innerHTML = `hours per month <span class="text-purple">(${efficiencyPercent}% efficiency)</span>`;
-                }
-            }
-            animateValue(costPerHour, dashData.metrics.cost_per_hour);
-            animateValue(totalExpensesElement, dashData.metrics.total_expenses.replace('$', ''));
-
-            // Update projections using current hourly rate
-            const currentHourlyRate = parseFloat(hourlyRate.textContent);
-            const monthlyBillableHours = parseFloat(dashData.metrics.billable_hours);
-            const monthlyRevenuePotential = currentHourlyRate * monthlyBillableHours;
-            const totalMonthlyExpenses = parseFloat(dashData.metrics.total_expenses.replace(/[^0-9.-]+/g, ''));
-            const monthlyProfitPotential = monthlyRevenuePotential - totalMonthlyExpenses;
-
-            // Update projections
-            animateValue(document.getElementById('monthly-revenue'), formatCurrency(monthlyRevenuePotential).replace('$', ''));
-            animateValue(document.getElementById('monthly-profit'), formatCurrency(monthlyProfitPotential).replace('$', ''));
-            const monthlyMargin = (monthlyProfitPotential / monthlyRevenuePotential * 100) || 0;
-            document.getElementById('monthly-margin').textContent = monthlyMargin.toFixed(1);
-
-            animateValue(document.getElementById('yearly-revenue'), formatCurrency(monthlyRevenuePotential * 12).replace('$', ''));
-            animateValue(document.getElementById('yearly-profit'), formatCurrency(monthlyProfitPotential * 12).replace('$', ''));
-            document.getElementById('yearly-margin').textContent = monthlyMargin.toFixed(1);
-
-            // Update expenses list
-            const expensesList = document.getElementById('expenses-list');
-            expensesList.innerHTML = '';
-
-            // Add overhead expenses header
-            expensesList.innerHTML += `
-                <tr class="expense-header">
-                    <td colspan="2"><strong>Overhead Expenses</strong></td>
-                </tr>
-            `;
-
-            // Add overhead expenses
-            let overhead = {...dashData.overhead_costs};
-            delete overhead.vehicle_expenses;
-            delete overhead.employee_wages;
-
-            let totalOverheadExpenses = 0;
-            Object.entries(overhead).forEach(([key, value]) => {
-                if (!key.toLowerCase().includes('vehicle') && !key.toLowerCase().includes('truck')) {
-                    const formattedKey = key.replace(/_/g, ' ')
-                        .split(' ')
-                        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-                        .join(' ');
-                    const expenseValue = parseFloat(value) || 0;
-                    totalOverheadExpenses += expenseValue;
-                    
-                    expensesList.innerHTML += `
-                        <tr class="overhead-expense">
-                            <td>${formattedKey}</td>
-                            <td class="text-end">${formatCurrency(expenseValue)}</td>
-                        </tr>
-                    `;
-                }
-            });
-
-            // Add overhead expenses subtotal
-            expensesList.innerHTML += `
-                <tr class="expense-subtotal">
-                    <td>Total Overhead Expenses</td>
-                    <td class="text-end">${formatCurrency(totalOverheadExpenses)}</td>
-                </tr>
-            `;
-
-            // Add truck expenses header
-            expensesList.innerHTML += `
-                <tr class="expense-header">
-                    <td colspan="2"><strong>Truck Expenses</strong></td>
-                </tr>
-            `;
-
-            let totalTruckExpenses = 0;
-            trucksData.trucks.forEach(truck => {
-                const truckExpenses = (
-                    parseFloat(truck.loan_payment || 0) +
-                    parseFloat(truck.insurance || 0) +
-                    parseFloat(truck.fuel_budget || 0) +
-                    parseFloat(truck.maintenance_budget || 0) +
-                    parseFloat(truck.other_expenses || 0)
-                );
-                totalTruckExpenses += truckExpenses;
-                
-                expensesList.innerHTML += `
-                    <tr class="truck-expense-item">
-                        <td>${truck.name}</td>
-                        <td class="text-end">${formatCurrency(truckExpenses)}</td>
-                    </tr>
-                `;
-            });
-
-            // Add truck expenses subtotal
-            expensesList.innerHTML += `
-                <tr class="expense-subtotal">
-                    <td>Total Truck Expenses</td>
-                    <td class="text-end">${formatCurrency(totalTruckExpenses)}</td>
-                </tr>
-            `;
-
-            // Add employee wages if they exist
-            const employeeWages = parseFloat(dashData.overhead_costs.employee_wages) || 0;
-            if (employeeWages > 0) {
-                expensesList.innerHTML += `
-                    <tr class="expense-header">
-                        <td colspan="2"><strong>Employee Wages</strong></td>
-                    </tr>
-                `;
-
-                // Add individual employee breakdown
-                trucksData.trucks.forEach(truck => {
-                    truck.employees.forEach(employee => {
-                        const monthlyWage = parseFloat(employee.hourly_wage) * parseFloat(employee.hours_per_week) * 4; // 4 weeks per month
-                        expensesList.innerHTML += `
-                            <tr class="truck-expense-item">
-                                <td>
-                                    <div>${employee.name}</div>
-                                    <small class="text-muted">${employee.position} - ${employee.hours_per_week}hrs/week @ $${employee.hourly_wage}/hr</small>
-                                </td>
-                                <td class="text-end">${formatCurrency(monthlyWage)}</td>
-                            </tr>
-                        `;
-                    });
-                });
-
-                expensesList.innerHTML += `
-                    <tr class="expense-subtotal">
-                        <td>Total Employee Wages</td>
-                        <td class="text-end">${formatCurrency(employeeWages)}</td>
-                    </tr>
-                `;
-            }
-
-            // Add total expenses
-            const totalExpenses = totalOverheadExpenses + totalTruckExpenses + employeeWages;
-            document.getElementById('expenses-total-value').textContent = formatCurrency(totalExpenses);
-
-            // Update truck summary
-            // Process trucks and expenses
-            let totalEmployees = new Set();
-            let totalHours = 0;
-
-            // Update trucks overview
-            const trucksOverview = document.getElementById('trucks-overview');
-            trucksOverview.innerHTML = '';
-
-            trucksData.trucks.forEach(truck => {
-                const weeklyHours = truck.effective_hours || truck.employees.reduce((sum, emp) => sum + parseFloat(emp.hours_per_week), 0);
-                totalHours += weeklyHours;
-                truck.employees.forEach(emp => totalEmployees.add(emp.employee_id));
-
-                const crewWages = truck.employees.reduce((sum, emp) => {
-                    return sum + (parseFloat(emp.hourly_wage) * parseFloat(emp.hours_per_week) * 4);
-                }, 0);
-
-                const truckExpenses = (
-                    parseFloat(truck.loan_payment || 0) +
-                    parseFloat(truck.insurance || 0) +
-                    parseFloat(truck.fuel_budget || 0) +
-                    parseFloat(truck.maintenance_budget || 0) +
-                    parseFloat(truck.other_expenses || 0)
-                );
-
-                const totalTruckMonthlyExpenses = truckExpenses + crewWages;
-
-                // Calculate revenue and profit with efficiency rate
-                const monthlyHours = weeklyHours * 4;
-                const monthlyBillableHours = monthlyHours * dashData.business_parameters.efficiency_rate;
-                const revenue = monthlyBillableHours * currentHourlyRate;
-                const profit = revenue - totalTruckMonthlyExpenses;
-
-                trucksOverview.innerHTML += `
-                    <div class="truck-card mb-3">
-                        <div class="truck-header">
-                            <div class="truck-title">
-                                <span class="truck-name">${truck.name}</span>
-                                <div class="truck-details">
-                                    <span class="truck-model">${truck.make || 'N/A'} ${truck.model || ''} ${truck.year || ''}</span>
-                                    <span class="truck-plate">${truck.license_plate || 'No Plate'}</span>
-                                </div>
-                            </div>
-                            <span class="truck-hours">${weeklyHours} hrs/week</span>
-                        </div>
-                        <div class="truck-team">
-                            <i class="fas fa-users"></i> ${truck.employees.map(emp => `${emp.name} (${emp.position})`).join(', ')}
-                        </div>
-                        <div class="truck-metrics">
-                            <div class="metric-item revenue">
-                                <div class="metric-label">Revenue Potential</div>
-                                <div class="metric-value">${formatCurrency(revenue)}</div>
-                            </div>
-                            <div class="metric-item profit">
-                                <div class="metric-label">Profit Potential</div>
-                                <div class="metric-value">${formatCurrency(profit)}</div>
-                            </div>
-                            <div class="metric-item">
-                                <div class="metric-label">Crew Wages</div>
-                                <div class="metric-value">${formatCurrency(crewWages)}</div>
-                            </div>
-                            <div class="metric-item">
-                                <div class="metric-label">Vehicle Expenses</div>
-                                <div class="metric-value">${formatCurrency(truckExpenses)}</div>
-                            </div>
-                            <div class="metric-item">
-                                <div class="metric-label">Total Monthly Expenses</div>
-                                <div class="metric-value">${formatCurrency(totalTruckMonthlyExpenses)}</div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            });
-
-            document.getElementById('total-employees').textContent = `${totalEmployees.size} employees`;
-            document.getElementById('total-hours').textContent = `${totalHours} hrs`;
-            document.getElementById('total-truck-expenses').textContent = formatCurrency(totalTruckExpenses);
-
-            // Update business parameters
-            const efficiencyRate = Math.round(dashData.business_parameters.efficiency_rate * 100);
-            const profitMargin = Math.round((1 - dashData.business_parameters.profit_margin_multiplier) * 100);
-            
-            const efficiencyInput = document.getElementById('efficiency-rate-input');
-            const profitMarginInput = document.getElementById('profit-margin-input');
-            
-            // Only update if the values are different from the saved ones
-            const savedEfficiencyRate = localStorage.getItem('efficiencyRate');
-            if (efficiencyInput) {
-                if (savedEfficiencyRate) {
-                    efficiencyInput.value = savedEfficiencyRate;
-                    const display = efficiencyInput.parentElement.parentElement.querySelector('.param-display');
-                    if (display) {
-                        display.textContent = savedEfficiencyRate + '%';
-                    }
-                } else {
-                    efficiencyInput.value = efficiencyRate;
-                    const display = efficiencyInput.parentElement.parentElement.querySelector('.param-display');
-                    if (display) {
-                        display.textContent = efficiencyRate + '%';
-                    }
-                }
-            }
-            
-            if (profitMarginInput && profitMarginInput.nextElementSibling) {
-                profitMarginInput.value = profitMargin;
-                profitMarginInput.nextElementSibling.textContent = profitMargin + '%';
-            }
-
-            // Restore the lock state and update UI
-            isHourlyRateLocked = currentLockState;
-            updateLockButtonState();
-        })
-        .catch(error => {
-            console.error('Error updating dashboard:', error);
-        });
-    }
-
-    function handleSliderRelease(input, parameter, valueTransform) {
-        const transformedValue = valueTransform(parseFloat(input.value));
-        
-        // Save to localStorage
-        if (input.id === 'efficiency-rate-input') {
-            localStorage.setItem('efficiencyRate', input.value);
-        } else if (input.id === 'profit-margin-input') {
-            localStorage.setItem('profitMargin', input.value);
-        }
-        saveStateToLocalStorage();
-        
-        // Save to server
-        fetch('/save_business_parameters', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                [parameter]: transformedValue,
-                preserve_lock_state: true
-            })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                const currentLockState = isHourlyRateLocked;
-                updateDashboard();
-                isHourlyRateLocked = currentLockState;
-                updateLockButtonState();
-            }
-        })
-        .catch(error => {
-            console.error('Error saving parameters:', error);
+        // Debounce the update
+        debouncedUpdateParameters({
+            hourly_rate: value
         });
     }
 
@@ -1505,8 +1472,8 @@
         if (isUpdating) return;
         
         const value = parseFloat(input.value);
-        isUpdating = true;
         
+        // Immediate update on release
         fetch('/save_business_parameters', {
             method: 'POST',
             headers: {
@@ -1520,12 +1487,11 @@
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                saveStateToLocalStorage();
-                updateDashboard();
+                updateDashboard(true); // Force immediate update
             }
         })
-        .finally(() => {
-            isUpdating = false;
+        .catch(error => {
+            console.error('Error updating hourly rate:', error);
         });
     }
 

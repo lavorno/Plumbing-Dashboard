@@ -329,13 +329,55 @@
 
 <script>
 function loadEmployees() {
+    console.log("Loading employees...");
     fetch('/get_employees')
         .then(response => response.json())
         .then(data => {
+            console.log("Received employee data:", data);
             const tableBody = document.getElementById('employeeTableBody');
             tableBody.innerHTML = '';
             
+            if (!data.success) {
+                console.error("Error loading employees:", data.error);
+                // Display error message in the table
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="8" class="text-center text-danger">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            Error loading employees: ${data.error}
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            if (!data.employees || !Array.isArray(data.employees)) {
+                console.error("Invalid employees data:", data);
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="8" class="text-center text-warning">
+                            <i class="fas fa-info-circle"></i>
+                            No employees found
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            if (data.employees.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="8" class="text-center text-muted">
+                            <i class="fas fa-users"></i>
+                            No employees added yet
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
             data.employees.forEach(employee => {
+                console.log("Processing employee:", employee);
                 const row = document.createElement('tr');
                 const monthlyWage = employee.hours_per_week * employee.hourly_wage * 4; // 4 weeks per month
                 row.innerHTML = `
@@ -362,6 +404,18 @@ function loadEmployees() {
                 `;
                 tableBody.appendChild(row);
             });
+        })
+        .catch(error => {
+            console.error("Error loading employees:", error);
+            const tableBody = document.getElementById('employeeTableBody');
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="8" class="text-center text-danger">
+                        <i class="fas fa-exclamation-circle"></i>
+                        Failed to load employees. Please try again later.
+                    </td>
+                </tr>
+            `;
         });
 }
 
@@ -496,4 +550,6 @@ function createEmployeeRow(employee) {
     `;
 }
 </script>
+
+<script src="{{ url_for('static', filename='js/employees.js') }}"></script>
 {% endblock %} 

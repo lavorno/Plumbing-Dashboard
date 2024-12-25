@@ -1,17 +1,21 @@
 {
     "overhead_costs": {
-        "employee_wages": 8800.0,
-        "insurance": 400,
-        "marketing": 1000,
+        "id": "cf10486c-7773-4b75-90c1-e89550c27934",
         "rent": 2000,
-        "tools_equipment": 500,
         "utilities": 500,
-        "pierce_brothers_truck_expenses": 1500.0,
-        "vehicle_expenses": 1500.0
+        "insurance": 400,
+        "tools_equipment": 500,
+        "vehicle_expenses": 1500.0,
+        "marketing": 1000,
+        "misc_expenses": 300,
+        "employee_wages": 72000.0,
+        "created_at": "2024-12-24T20:08:42.296056+00:00",
+        "updated_at": "2024-12-24T20:08:42.296056+00:00",
+        "pierce_brothers_truck_expenses": 1500.0
     },
     "business_parameters": {
-        "efficiency_rate": 0.9,
-        "profit_margin_multiplier": 0.1,
+        "efficiency_rate": 0.4,
+        "profit_margin_multiplier": 0.25,
         "hourly_rate": 450.0,
         "locked_hourly_rate": null
     }

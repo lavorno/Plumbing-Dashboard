@@ -57,6 +57,74 @@
             </form>
         </div>
     </div>
+
+    <!-- Add New Expense Modal -->
+    <div class="modal fade" id="addExpenseModal" tabindex="-1" aria-labelledby="addExpenseModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content bg-dark">
+                <div class="modal-header border-bottom border-purple">
+                    <h5 class="modal-title text-purple" id="addExpenseModalLabel">
+                        <i class="fas fa-plus-circle"></i> Add New Expense
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="newExpenseName" class="form-label">Expense Name</label>
+                        <input type="text" class="form-control" id="newExpenseName" placeholder="Enter expense name">
+                    </div>
+                    <div class="mb-3">
+                        <label for="newExpenseAmount" class="form-label">Initial Amount ($)</label>
+                        <input type="number" class="form-control" id="newExpenseAmount" placeholder="0.00" step="0.01" min="0">
+                    </div>
+                </div>
+                <div class="modal-footer border-top border-purple">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="createNewExpense()">Add Expense</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Expense Details Modal -->
+    <div class="modal fade" id="expenseDetailsModal" tabindex="-1" aria-labelledby="expenseDetailsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content bg-dark">
+                <div class="modal-header border-bottom border-purple">
+                    <h5 class="modal-title text-purple" id="expenseDetailsModalLabel">
+                        <i class="fas fa-info-circle"></i> Expense Details
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Expense Name</label>
+                        <input type="text" class="form-control" id="expenseDetailsName" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Current Amount</label>
+                        <input type="number" class="form-control" id="expenseDetailsAmount" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Description</label>
+                        <textarea class="form-control" id="expenseDetailsDescription" rows="3" placeholder="Add a description for this expense"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Notes</label>
+                        <textarea class="form-control" id="expenseDetailsNotes" rows="2" placeholder="Add any additional notes"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Date Added</label>
+                        <input type="text" class="form-control" id="expenseDetailsDate" readonly>
+                    </div>
+                </div>
+                <div class="modal-footer border-top border-purple">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="saveExpenseDetails()">Save Details</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}
 
@@ -230,6 +298,117 @@
         padding: 12px;
         color: white;
     }
+
+    .truck-expense {
+        background: rgba(167, 139, 250, 0.05);
+        border-radius: 12px;
+        padding: 12px;
+        margin-bottom: 1rem;
+    }
+
+    .truck-expense-header {
+        color: #a78bfa;
+        font-weight: 500;
+        margin-bottom: 8px;
+    }
+
+    .truck-employee {
+        padding-left: 1rem;
+        color: #e5e7eb;
+    }
+
+    .truck-subtotal {
+        margin-top: 8px;
+        padding-top: 8px;
+        border-top: 1px solid rgba(167, 139, 250, 0.2);
+        font-weight: 500;
+        color: #a78bfa;
+    }
+
+    /* Modal Styles */
+    .modal-content {
+        background: var(--dark-bg);
+        border: 1px solid rgba(167, 139, 250, 0.2);
+        border-radius: 16px;
+        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .modal-header {
+        border-bottom-color: rgba(167, 139, 250, 0.2) !important;
+        padding: 1rem 1.5rem;
+    }
+
+    .modal-footer {
+        border-top-color: rgba(167, 139, 250, 0.2) !important;
+        padding: 1rem 1.5rem;
+    }
+
+    .modal-body {
+        padding: 1.5rem;
+    }
+
+    .btn-close-white {
+        filter: invert(1) grayscale(100%) brightness(200%);
+    }
+
+    .border-purple {
+        border-color: rgba(167, 139, 250, 0.2) !important;
+    }
+
+    .modal .form-control {
+        background: rgba(0, 0, 0, 0.2);
+        border: 1px solid rgba(167, 139, 250, 0.2);
+        color: white;
+        border-radius: 8px;
+        padding: 0.75rem 1rem;
+        transition: all 0.2s ease;
+    }
+
+    .modal .form-control:focus {
+        border-color: #a78bfa;
+        box-shadow: 0 0 0 2px rgba(167, 139, 250, 0.25);
+        background: rgba(0, 0, 0, 0.3);
+    }
+
+    .modal .form-control::placeholder {
+        color: rgba(255, 255, 255, 0.4);
+    }
+
+    .btn-outline-secondary {
+        color: #9ca3af;
+        border: 1px solid rgba(156, 163, 175, 0.3);
+        background: transparent;
+    }
+
+    .btn-outline-secondary:hover {
+        background: rgba(156, 163, 175, 0.1);
+        color: #d1d5db;
+        border-color: rgba(156, 163, 175, 0.5);
+    }
+
+    .expense-info-btn {
+        background: transparent;
+        border: 1px solid rgba(167, 139, 250, 0.3);
+        color: #a78bfa;
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+    }
+
+    .expense-info-btn:hover {
+        background: rgba(167, 139, 250, 0.1);
+        border-color: rgba(167, 139, 250, 0.5);
+        color: #c4b5fd;
+    }
+
+    .modal textarea.form-control {
+        resize: none;
+        min-height: auto;
+    }
 </style>
 
 <script>
@@ -246,361 +425,295 @@
         };
     }
 
-    function createExpenseElement(name, value, details = '') {
+    function createExpenseElement(name, value, type = 'overhead', details = {}) {
         const expenseDiv = document.createElement('div');
-        expenseDiv.className = 'expense-group';
-        const formattedName = name.replace(/_/g, ' ');
-        const capitalizedName = formattedName.split(' ')
-            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-            .join(' ');
-
+        expenseDiv.className = 'col-12';
         expenseDiv.innerHTML = `
-            <div class="input-group">
-                <input type="text" class="form-control expense-name" 
-                       value="${capitalizedName}"
-                       onchange="updateExpenseName(this)"
-                       data-original-name="${name}">
-                <span class="input-group-text">$</span>
-                <input type="number" class="form-control expense-value" 
-                       value="${value}"
-                       onchange="updateExpenseValue(this)"
-                       onkeyup="updateExpenseValue(this)"
-                       step="0.01"
-                       min="0">
-                <button type="button" class="btn expense-info" 
-                        onclick="toggleExpenseDetails(this)"
-                        data-bs-toggle="popover"
-                        data-bs-placement="left"
-                        data-bs-content="${details}">
-                    <i class="fas fa-info-circle"></i>
-                </button>
-                <button type="button" class="btn btn-outline-danger" onclick="removeExpense(this)">
-                    <i class="fas fa-trash-alt"></i>
-                </button>
-            </div>`;
-
+            <div class="expense-group">
+                <div class="input-group">
+                    <span class="input-group-text">${name}</span>
+                    <input type="number" class="form-control" value="${value}" 
+                           data-name="${name.toLowerCase().replace(/ /g, '_')}"
+                           onchange="updateExpense(this)">
+                    <span class="input-group-text">$</span>
+                    <button type="button" class="expense-info-btn" onclick="showExpenseDetails('${name}', ${value})">
+                        <i class="fas fa-info-circle"></i>
+                    </button>
+                </div>
+            </div>
+        `;
         return expenseDiv;
     }
 
-    function addNewExpense() {
-        const allExpenses = document.getElementById('all-expenses');
-        const newExpense = createExpenseElement('new_expense', 0);
-        allExpenses.appendChild(newExpense);
-        initializePopovers();
+    function createTruckExpenseElement(truck) {
+        const truckDiv = document.createElement('div');
+        truckDiv.className = 'col-12 truck-expense';
+        
+        let employeeExpenses = 0;
+        let employeeHtml = '';
+        
+        if (truck.employees && truck.employees.length > 0) {
+            truck.employees.forEach(emp => {
+                const monthlyWage = emp.hourly_wage * emp.hours_per_week * 4;
+                employeeExpenses += monthlyWage;
+                employeeHtml += `
+                    <div class="truck-employee">
+                        ${emp.name} (${emp.position}) - $${monthlyWage.toLocaleString('en-US', {minimumFractionDigits: 2})}
+                    </div>
+                `;
+            });
+        }
+
+        const totalTruckCost = truck.total_expenses + employeeExpenses;
+
+        truckDiv.innerHTML = `
+            <div class="truck-expense-header">
+                ${truck.name} (${truck.make} ${truck.model} ${truck.year})
+            </div>
+            <div class="expense-group">
+                <div class="input-group">
+                    <span class="input-group-text">Vehicle Expenses</span>
+                    <input type="number" class="form-control" value="${truck.total_expenses}" 
+                           data-truck-id="${truck.truck_id}"
+                           onchange="updateTruckExpense(this)">
+                    <span class="input-group-text">$</span>
+                </div>
+            </div>
+            ${employeeHtml}
+            <div class="truck-subtotal">
+                Total Monthly Cost: $${totalTruckCost.toLocaleString('en-US', {minimumFractionDigits: 2})}
+            </div>
+        `;
+        
+        return truckDiv;
+    }
+
+    function updateExpense(input) {
+        const name = input.dataset.name;
+        const value = parseFloat(input.value) || 0;
+        if (typeof expenses[name] === 'object') {
+            expenses[name].amount = value;
+        } else {
+            expenses[name] = {
+                amount: value,
+                details: {
+                    description: '',
+                    notes: '',
+                    dateAdded: new Date().toLocaleDateString()
+                }
+            };
+        }
         updateTotal();
     }
 
-    function removeExpense(button) {
-        button.closest('.expense-group').remove();
+    function updateTruckExpense(input) {
+        const truckId = input.dataset.truckId;
+        const value = parseFloat(input.value) || 0;
+        if (!expenses.trucks) expenses.trucks = {};
+        expenses.trucks[truckId] = value;
         updateTotal();
-        saveSettings();
     }
-
-    function updateExpenseName(input) {
-        const originalName = input.dataset.originalName;
-        const newName = input.value.toLowerCase().replace(/ /g, '_');
-        input.dataset.originalName = newName;
-        saveSettings();
-    }
-
-    const updateExpenseValue = debounce(function(input) {
-        input.value = parseFloat(input.value || 0).toFixed(2);
-        updateTotal();
-        saveSettings();
-    }, 500);
 
     function updateTotal() {
-        try {
-            const expenseInputs = document.querySelectorAll('.expense-value');
-            let total = 0;
-            
-            expenseInputs.forEach(input => {
-                const value = parseFloat(input.value || 0);
-                if (!isNaN(value)) {
-                    total += value;
-                }
-            });
-            
-            const totalElement = document.getElementById('expenses-total');
-            if (totalElement) {
-                totalElement.textContent = total.toFixed(2);
-                console.log('New total:', total.toFixed(2)); // Debug log
+        let total = 0;
+        
+        // Sum general expenses
+        Object.values(expenses).forEach(value => {
+            if (typeof value === 'object' && 'amount' in value) {
+                total += value.amount;
+            } else if (typeof value === 'number') {
+                total += value;
             }
-        } catch (error) {
-            console.error('Error updating total:', error);
+        });
+        
+        // Sum truck expenses
+        if (expenses.trucks) {
+            Object.values(expenses.trucks).forEach(value => {
+                total += parseFloat(value) || 0;
+            });
         }
-    }
-
-    function toggleExpenseDetails(button) {
-        // Initialize popover if not already initialized
-        if (!button._popover) {
-            new bootstrap.Popover(button);
-        }
-    }
-
-    function initializePopovers() {
-        const popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
-        popoverTriggerList.map(function (popoverTriggerEl) {
-            return new bootstrap.Popover(popoverTriggerEl);
+        
+        document.getElementById('expenses-total').textContent = total.toLocaleString('en-US', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
         });
     }
 
     function sortExpenses(by) {
-        const allExpenses = document.getElementById('all-expenses');
-        const expenses = Array.from(allExpenses.children);
-
-        expenses.sort((a, b) => {
+        const expensesContainer = document.getElementById('all-expenses');
+        const expenseElements = Array.from(expensesContainer.children);
+        
+        expenseElements.sort((a, b) => {
+            const aInput = a.querySelector('input');
+            const bInput = b.querySelector('input');
+            
             if (by === 'name') {
-                const nameA = a.querySelector('.expense-name').value.toLowerCase();
-                const nameB = b.querySelector('.expense-name').value.toLowerCase();
-                return nameA.localeCompare(nameB);
-            } else if (by === 'amount') {
-                const amountA = parseFloat(a.querySelector('.expense-value').value || 0);
-                const amountB = parseFloat(b.querySelector('.expense-value').value || 0);
-                return amountB - amountA;
+                return aInput.dataset.name.localeCompare(bInput.dataset.name);
+            } else {
+                return (parseFloat(bInput.value) || 0) - (parseFloat(aInput.value) || 0);
             }
         });
-
-        expenses.forEach(expense => allExpenses.appendChild(expense));
+        
+        expenseElements.forEach(element => expensesContainer.appendChild(element));
     }
 
-    function saveSettings() {
-        const expenses = {};
-        document.querySelectorAll('.expense-group').forEach(group => {
-            const nameInput = group.querySelector('.expense-name');
-            const valueInput = group.querySelector('.expense-value');
-            if (nameInput && valueInput) {
-                const name = nameInput.value.toLowerCase().replace(/ /g, '_');
-                expenses[name] = parseFloat(valueInput.value || 0);
-            }
-        });
+    function addNewExpense() {
+        // Show the modal instead of using prompt
+        const modal = new bootstrap.Modal(document.getElementById('addExpenseModal'));
+        modal.show();
+    }
 
-        // Get the current employee_wages value before saving
-        fetch('/get_settings')
-            .then(response => response.json())
-            .then(data => {
-                // Preserve the employee_wages value
-                if (data.overhead_costs && data.overhead_costs.employee_wages !== undefined) {
-                    expenses.employee_wages = data.overhead_costs.employee_wages;
+    function createNewExpense() {
+        const name = document.getElementById('newExpenseName').value.trim();
+        const amount = parseFloat(document.getElementById('newExpenseAmount').value) || 0;
+        
+        if (name) {
+            const expenseElement = createExpenseElement(name, amount);
+            document.getElementById('all-expenses').appendChild(expenseElement);
+            const expenseKey = name.toLowerCase().replace(/ /g, '_');
+            expenses[expenseKey] = {
+                amount: amount,
+                details: {
+                    description: '',
+                    notes: '',
+                    dateAdded: new Date().toLocaleDateString()
                 }
-
-                // Save the complete expenses object
-                fetch('/update_settings', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        overhead_costs: expenses
-                    })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        showAlert('success', 'Settings saved successfully!');
-                    } else {
-                        showAlert('danger', 'Error saving settings');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    showAlert('danger', 'Error saving settings');
-                });
-            })
-            .catch(error => {
-                console.error('Error getting current settings:', error);
-                showAlert('danger', 'Error saving settings');
-            });
+            };
+            updateTotal();
+            
+            // Close the modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('addExpenseModal'));
+            modal.hide();
+            
+            // Clear the form
+            document.getElementById('newExpenseName').value = '';
+            document.getElementById('newExpenseAmount').value = '';
+            
+            // Show success message
+            showAlert('success', `Added new expense: ${name}`);
+        }
     }
 
     function showAlert(type, message) {
         const alertDiv = document.createElement('div');
-        alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
-        alertDiv.innerHTML = `
-            ${message}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        `;
+        alertDiv.className = `alert alert-${type}`;
+        alertDiv.textContent = message;
         
         const container = document.querySelector('.container');
         container.insertBefore(alertDiv, container.firstChild);
         
-        // Auto-dismiss after 3 seconds
-        setTimeout(() => {
-            alertDiv.remove();
-        }, 3000);
+        setTimeout(() => alertDiv.remove(), 3000);
     }
 
-    async function loadTruckExpenses() {
-        try {
-            const response = await fetch('/get_trucks');
-            const data = await response.json();
-            const truckExpensesDiv = document.getElementById('truck-expenses');
-            
-            data.trucks.forEach(truck => {
-                const totalTruckExpenses = (
-                    parseFloat(truck.loan_payment || 0) +
-                    parseFloat(truck.insurance || 0) +
-                    parseFloat(truck.fuel_budget || 0) +
-                    parseFloat(truck.maintenance_budget || 0) +
-                    parseFloat(truck.other_expenses || 0)
-                );
+    let expenses = {};
 
-                const truckExpenseElement = document.createElement('div');
-                truckExpenseElement.className = 'col-md-6';
-                truckExpenseElement.innerHTML = `
-                    <div class="expense-group">
-                        <div class="input-group">
-                            <span class="form-control expense-name">${truck.name}</span>
-                            <span class="input-group-text">$</span>
-                            <span class="form-control text-end">${totalTruckExpenses.toFixed(2)}</span>
-                            <button type="button" class="btn expense-info" 
-                                    onclick="showTruckExpenseDetails('${truck.truck_id}')"
-                                    title="View Details">
-                                <i class="fas fa-info-circle"></i>
-                            </button>
-                        </div>
-                    </div>
-                `;
-                truckExpensesDiv.appendChild(truckExpenseElement);
-            });
-        } catch (error) {
-            console.error('Error loading truck expenses:', error);
-        }
-    }
-
-    function showTruckExpenseDetails(truckId) {
-        fetch(`/get_truck/${truckId}`)
-            .then(response => response.json())
-            .then(truck => {
-                const details = `
-                    <div class="truck-expense-details">
-                        <h6 class="mb-3">${truck.name} Expenses Breakdown</h6>
-                        <div class="expense-item">
-                            <span>Loan Payment</span>
-                            <span>$${parseFloat(truck.loan_payment || 0).toFixed(2)}</span>
-                        </div>
-                        <div class="expense-item">
-                            <span>Insurance</span>
-                            <span>$${parseFloat(truck.insurance || 0).toFixed(2)}</span>
-                        </div>
-                        <div class="expense-item">
-                            <span>Fuel Budget</span>
-                            <span>$${parseFloat(truck.fuel_budget || 0).toFixed(2)}</span>
-                        </div>
-                        <div class="expense-item">
-                            <span>Maintenance Budget</span>
-                            <span>$${parseFloat(truck.maintenance_budget || 0).toFixed(2)}</span>
-                        </div>
-                        <div class="expense-item">
-                            <span>Other Expenses</span>
-                            <span>$${parseFloat(truck.other_expenses || 0).toFixed(2)}</span>
-                        </div>
-                        <div class="expense-total">
-                            <strong>Total</strong>
-                            <strong>$${(
-                                parseFloat(truck.loan_payment || 0) +
-                                parseFloat(truck.insurance || 0) +
-                                parseFloat(truck.fuel_budget || 0) +
-                                parseFloat(truck.maintenance_budget || 0) +
-                                parseFloat(truck.other_expenses || 0)
-                            ).toFixed(2)}</strong>
-                        </div>
-                    </div>
-                `;
+    // Load expenses from server
+    fetch('/get_dashboard_data')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Clear existing expenses
+                document.getElementById('all-expenses').innerHTML = '';
+                document.getElementById('truck-expenses').innerHTML = '';
                 
-                // Show the details in a Bootstrap modal
-                const modal = new bootstrap.Modal(document.getElementById('expenseDetailsModal'));
-                document.querySelector('#expenseDetailsModal .modal-body').innerHTML = details;
-                modal.show();
-            });
-    }
+                // Add general expenses
+                data.expenses.forEach(expense => {
+                    if (expense.type === 'overhead') {
+                        const amount = parseFloat(expense.amount.replace(/[^0-9.-]+/g, ''));
+                        const expenseElement = createExpenseElement(expense.name, amount);
+                        document.getElementById('all-expenses').appendChild(expenseElement);
+                        expenses[expense.name.toLowerCase().replace(/ /g, '_')] = amount;
+                    }
+                });
 
-    // Modify the existing loadExpenses function to handle both general and truck expenses
-    async function loadExpenses() {
-        try {
-            const [expensesResponse, trucksResponse] = await Promise.all([
-                fetch('/get_expenses'),
-                fetch('/get_trucks')
-            ]);
-            
-            const expensesData = await expensesResponse.json();
-            const trucksData = await trucksResponse.json();
-            
-            // Clear existing expenses
-            document.getElementById('all-expenses').innerHTML = '';
-            document.getElementById('truck-expenses').innerHTML = '';
-            
-            // Load general expenses
-            let totalExpenses = 0;
-            for (const [name, amount] of Object.entries(expensesData.overhead_costs)) {
-                // Skip truck-specific expenses as they'll be handled separately
-                if (!name.endsWith('_expenses')) {
-                    const expenseElement = createExpenseElement(name, amount);
-                    document.getElementById('all-expenses').appendChild(expenseElement);
-                    totalExpenses += parseFloat(amount);
+                // Add truck expenses
+                if (data.trucks) {
+                    data.trucks.forEach(truck => {
+                        const truckElement = createTruckExpenseElement(truck);
+                        document.getElementById('truck-expenses').appendChild(truckElement);
+                        if (!expenses.trucks) expenses.trucks = {};
+                        expenses.trucks[truck.truck_id] = truck.total_expenses;
+                    });
                 }
+
+                updateTotal();
+            } else {
+                showAlert('danger', 'Error loading expenses: ' + data.error);
             }
-            
-            // Load truck expenses
-            trucksData.trucks.forEach(truck => {
-                const truckTotal = (
-                    parseFloat(truck.loan_payment || 0) +
-                    parseFloat(truck.insurance || 0) +
-                    parseFloat(truck.fuel_budget || 0) +
-                    parseFloat(truck.maintenance_budget || 0) +
-                    parseFloat(truck.other_expenses || 0)
-                );
-                totalExpenses += truckTotal;
-                
-                const truckExpenseElement = document.createElement('div');
-                truckExpenseElement.className = 'col-md-6';
-                truckExpenseElement.innerHTML = `
-                    <div class="expense-group">
-                        <div class="input-group">
-                            <span class="form-control expense-name">${truck.name}</span>
-                            <span class="input-group-text">$</span>
-                            <span class="form-control text-end">${truckTotal.toFixed(2)}</span>
-                            <button type="button" class="btn expense-info" 
-                                    onclick="showTruckExpenseDetails('${truck.truck_id}')"
-                                    title="View Details">
-                                <i class="fas fa-info-circle"></i>
-                            </button>
-                        </div>
-                    </div>
-                `;
-                document.getElementById('truck-expenses').appendChild(truckExpenseElement);
-            });
-            
-            // Update total
-            document.getElementById('expenses-total').textContent = totalExpenses.toFixed(2);
-            
-        } catch (error) {
-            console.error('Error loading expenses:', error);
-            showAlert('error', 'Failed to load expenses');
-        }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showAlert('danger', 'Error loading expenses');
+        });
+
+    function saveSettings() {
+        // Save to server
+        fetch('/update_settings', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                overhead_costs: expenses
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showAlert('success', 'Settings saved successfully!');
+            } else {
+                showAlert('danger', 'Error saving settings');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showAlert('danger', 'Error saving settings');
+        });
     }
 
-    // Call loadExpenses when the page loads
-    document.addEventListener('DOMContentLoaded', function() {
-        loadExpenses();
-    });
-</script>
+    function showExpenseDetails(name, amount) {
+        const expenseKey = name.toLowerCase().replace(/ /g, '_');
+        const details = expenses[expenseKey]?.details || {
+            description: '',
+            notes: '',
+            dateAdded: new Date().toLocaleDateString()
+        };
 
-<!-- Add modal for expense details -->
-<div class="modal fade" id="expenseDetailsModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content bg-dark text-white">
-            <div class="modal-header border-bottom border-secondary">
-                <h5 class="modal-title">Expense Details</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <!-- Details will be inserted here -->
-            </div>
-            <div class="modal-footer border-top border-secondary">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-            </div>
-        </div>
-    </div>
-</div>
+        document.getElementById('expenseDetailsName').value = name;
+        document.getElementById('expenseDetailsAmount').value = amount;
+        document.getElementById('expenseDetailsDescription').value = details.description || '';
+        document.getElementById('expenseDetailsNotes').value = details.notes || '';
+        document.getElementById('expenseDetailsDate').value = details.dateAdded;
+
+        // Store the expense key for saving
+        document.getElementById('expenseDetailsModal').dataset.expenseKey = expenseKey;
+
+        const modal = new bootstrap.Modal(document.getElementById('expenseDetailsModal'));
+        modal.show();
+    }
+
+    function saveExpenseDetails() {
+        const modal = document.getElementById('expenseDetailsModal');
+        const expenseKey = modal.dataset.expenseKey;
+
+        if (!expenses[expenseKey].details) {
+            expenses[expenseKey] = {
+                ...expenses[expenseKey],
+                details: {}
+            };
+        }
+
+        expenses[expenseKey].details = {
+            description: document.getElementById('expenseDetailsDescription').value,
+            notes: document.getElementById('expenseDetailsNotes').value,
+            dateAdded: document.getElementById('expenseDetailsDate').value
+        };
+
+        // Close the modal
+        bootstrap.Modal.getInstance(modal).hide();
+        
+        // Show success message
+        showAlert('success', 'Expense details saved successfully!');
+    }
+</script>
 {% endblock %} 

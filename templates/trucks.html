@@ -30,7 +30,7 @@
                 </button>
             </div>
 
-            <div id="truckTableBody">
+            <div id="truckContainer">
                 <!-- Trucks will be added here dynamically -->
             </div>
         </div>
@@ -676,6 +676,40 @@
     background: rgba(167, 139, 250, 0.2);
     border-color: rgba(167, 139, 250, 0.5);
 }
+
+.metric-subtitle {
+    color: #a78bfa;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid rgba(167, 139, 250, 0.2);
+}
+
+.employee-wage {
+    font-size: 0.9rem;
+    padding: 0.25rem 0;
+    border-left: 2px solid rgba(167, 139, 250, 0.2);
+    padding-left: 0.5rem;
+}
+
+.total-wages {
+    margin-top: 0.5rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid rgba(167, 139, 250, 0.2);
+    font-weight: 500;
+}
+
+.total-expenses {
+    margin-top: 0.5rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid rgba(167, 139, 250, 0.2);
+    font-weight: 600;
+    color: #ef4444;
+}
+
+.metric-card {
+    padding: 1.25rem;
+}
 </style>
 
 {% block scripts %}
@@ -696,6 +730,40 @@ function formatNumber(num) {
 
 let currentTrucks = [];
 
+function calculateTotalExpenses(truck) {
+    const monthlyExpenses = (
+        parseFloat(truck.loan_payment || 0) +
+        parseFloat(truck.insurance || 0) +
+        parseFloat(truck.fuel_budget || 0) +
+        parseFloat(truck.maintenance_budget || 0) +
+        parseFloat(truck.other_expenses || 0)
+    );
+    
+    // Calculate crew wages
+    const crewWages = truck.employees ? truck.employees.reduce((total, emp) => {
+        return total + (parseFloat(emp.hourly_wage || 0) * parseFloat(emp.hours_per_week || 0) * 4);
+    }, 0) : 0;
+    
+    return monthlyExpenses + crewWages;
+}
+
+function calculateMonthlyRevenue(truck, efficiencyRate, hourlyRate) {
+    const weeklyHours = truck.effective_hours || 
+        (truck.employees ? truck.employees.reduce((total, emp) => total + parseFloat(emp.hours_per_week || 0), 0) : 0);
+    const monthlyBillableHours = weeklyHours * 4 * efficiencyRate;
+    return monthlyBillableHours * hourlyRate;
+}
+
+function calculateRevenue(truck, efficiencyRate, hourlyRate) {
+    return calculateMonthlyRevenue(truck, efficiencyRate, hourlyRate);
+}
+
+function calculateProfit(truck, efficiencyRate, hourlyRate) {
+    const revenue = calculateMonthlyRevenue(truck, efficiencyRate, hourlyRate);
+    const expenses = calculateTotalExpenses(truck);
+    return revenue - expenses;
+}
+
 function sortTrucks(by) {
     currentTrucks.sort((a, b) => {
         switch(by) {
@@ -703,14 +771,14 @@ function sortTrucks(by) {
                 return a.name.localeCompare(b.name);
             
             case 'revenue': {
-                const revenueA = calculateRevenue(a);
-                const revenueB = calculateRevenue(b);
+                const revenueA = calculateMonthlyRevenue(a, window.efficiencyRate, window.hourlyRate);
+                const revenueB = calculateMonthlyRevenue(b, window.efficiencyRate, window.hourlyRate);
                 return revenueB - revenueA;
             }
             
             case 'profit': {
-                const profitA = calculateProfit(a);
-                const profitB = calculateProfit(b);
+                const profitA = calculateProfit(a, window.efficiencyRate, window.hourlyRate);
+                const profitB = calculateProfit(b, window.efficiencyRate, window.hourlyRate);
                 return profitB - profitA;
             }
             
@@ -720,36 +788,18 @@ function sortTrucks(by) {
                 return expensesB - expensesA;
             }
             
-            case 'team':
-                return b.employees.length - a.employees.length;
+            case 'team': {
+                const teamA = a.employees ? a.employees.length : 0;
+                const teamB = b.employees ? b.employees.length : 0;
+                return teamB - teamA;
+            }
             
             default:
                 return 0;
         }
     });
     
-    renderTrucks();
-}
-
-function calculateRevenue(truck) {
-    const weeklyHours = truck.effective_hours || truck.employees.reduce((sum, emp) => sum + parseFloat(emp.hours_per_week), 0);
-    const monthlyBillableHours = weeklyHours * 4 * window.efficiencyRate;
-    return monthlyBillableHours * window.hourlyRate;
-}
-
-function calculateTotalExpenses(truck) {
-    const crewWages = truck.employees.reduce((sum, emp) => {
-        return sum + (parseFloat(emp.hourly_wage) * parseFloat(emp.hours_per_week) * 4);
-    }, 0);
-    
-    const truckExpenses = calculateTotalTruckExpenses(truck);
-    return crewWages + truckExpenses;
-}
-
-function calculateProfit(truck) {
-    const revenue = calculateRevenue(truck);
-    const expenses = calculateTotalExpenses(truck);
-    return revenue - expenses;
+    renderTrucks(window.efficiencyRate, window.hourlyRate);
 }
 
 function loadTrucks() {
@@ -758,193 +808,231 @@ function loadTrucks() {
         fetch('/get_employees').then(response => response.json()),
         fetch('/get_dashboard_data').then(response => response.json())
     ]).then(([truckData, employeeData, dashData]) => {
-        currentTrucks = truckData.trucks;
-        window.efficiencyRate = dashData.business_parameters.efficiency_rate;
-        window.hourlyRate = parseFloat(dashData.metrics.hourly_rate);
-        window.profitMargin = 1 - dashData.business_parameters.profit_margin_multiplier;
+        if (!truckData.success || !employeeData.success) {
+            showNotification('Failed to load data', 'error');
+            return;
+        }
         
-        // Merge employee data into trucks
-        currentTrucks = currentTrucks.map(truck => {
-            truck.employees = truck.employee_ids.map(id => 
-                employeeData.employees.find(emp => emp.employee_id === id)
-            ).filter(emp => emp); // Filter out any undefined employees
+        console.log('Truck data:', truckData);
+        console.log('Employee data:', employeeData);
+        
+        // Create a map of employees by ID for quick lookup
+        const employeesById = {};
+        employeeData.employees.forEach(emp => {
+            employeesById[emp.employee_id] = emp;
+        });
+        
+        console.log('Employees by ID:', employeesById);
+        
+        // Add employee objects to each truck
+        currentTrucks = truckData.trucks.map(truck => {
+            console.log('Processing truck:', truck);
+            // The employees should already be attached from the backend
+            if (!truck.employees) {
+                truck.employees = [];
+            }
+            console.log('Truck employees:', truck.employees);
             return truck;
         });
+        
+        console.log('Processed trucks:', currentTrucks);
+        
+        window.efficiencyRate = dashData.business_parameters.efficiency_rate;
+        window.hourlyRate = parseFloat(dashData.metrics.hourly_rate.replace(/[^0-9.]/g, ''));
+        window.profitMargin = 1 - dashData.business_parameters.profit_margin_multiplier;
+        
+        // Populate employee select in the form
+        const employeeSelect = document.getElementById('truckEmployees');
+        if (employeeSelect) {
+            employeeSelect.innerHTML = employeeData.employees.map(emp => 
+                `<option value="${emp.employee_id}">${emp.name} (${emp.position})</option>`
+            ).join('');
+        }
 
         renderTrucks(window.efficiencyRate, window.hourlyRate);
-
-        // Update employee select options
-        const employeeSelect = document.getElementById('truckEmployees');
-        employeeSelect.innerHTML = employeeData.employees.map(emp => 
-            `<option value="${emp.employee_id}">${emp.name} - ${emp.position}</option>`
-        ).join('');
+    }).catch(error => {
+        console.error('Error loading data:', error);
+        showNotification('Failed to load data: ' + error.message, 'error');
     });
 }
 
 function renderTrucks(efficiencyRate, hourlyRate) {
-    const tableBody = document.getElementById('truckTableBody');
-    tableBody.innerHTML = '';
-    
-    currentTrucks.forEach(truck => {
-        // Calculate financial metrics
-        const weeklyHours = truck.effective_hours || truck.employees.reduce((sum, emp) => 
-            sum + (parseFloat(emp.hours_per_week) || 0), 0);
-        const monthlyHours = weeklyHours * 4;
-        
-        // Calculate crew wages (monthly)
-        const crewWages = truck.employees.reduce((sum, emp) => 
-            sum + ((parseFloat(emp.hourly_wage) || 0) * (parseFloat(emp.hours_per_week) || 0) * 4), 0);
+    const truckContainer = document.getElementById('truckContainer');
+    if (!truckContainer) return;
 
-        // Calculate truck expenses
-        const truckExpenses = calculateTotalTruckExpenses(truck);
-        const totalMonthlyExpenses = truckExpenses + crewWages;
+    truckContainer.innerHTML = currentTrucks.map(truck => {
+        const monthlyExpenses = calculateTotalExpenses(truck);
+        const monthlyRevenue = calculateMonthlyRevenue(truck, efficiencyRate, hourlyRate);
+        const monthlyProfit = monthlyRevenue - monthlyExpenses;
+        const profitMargin = monthlyRevenue > 0 ? (monthlyProfit / monthlyRevenue) * 100 : 0;
 
-        // Calculate revenue and profit
-        const monthlyBillableHours = weeklyHours * 4 * efficiencyRate;
-        const revenue = monthlyBillableHours * hourlyRate;
-        const profit = revenue - totalMonthlyExpenses;
-        const profitMargin = revenue > 0 ? (profit / revenue) * 100 : 0;
-
-        const truckElement = document.createElement('div');
-        truckElement.className = 'truck-profile mb-4';
-        truckElement.innerHTML = `
-            <div class="truck-header">
-                <div class="truck-title">
-                    <h4 class="mb-2">${truck.name}</h4>
-                    <div class="truck-subtitle">
-                        <span class="model-badge">${truck.make || ''} ${truck.model || ''} ${truck.year || ''}</span>
-                        <span class="plate-badge">${truck.license_plate || ''}</span>
-                        <span class="area-badge">${truck.service_area || 'Not specified'}</span>
-                    </div>
-                </div>
-                <div class="action-buttons">
-                    <button class="btn btn-sm btn-outline-primary" onclick="editTruck('${truck.truck_id}')">
-                        <i class="fas fa-edit"></i> Edit
-                    </button>
-                    <button class="btn btn-sm btn-outline-danger" onclick="deleteTruck('${truck.truck_id}')">
-                        <i class="fas fa-trash"></i> Delete
-                    </button>
-                </div>
-            </div>
-
-            <div class="truck-content">
-                <div class="content-section team-section">
-                    <h6 class="section-title">Team Members</h6>
-                    <div class="team-grid">
-                        ${truck.employees.map(emp => `
-                            <div class="employee-card">
-                                <div class="employee-name">${emp.name}</div>
-                                <div class="employee-position">${emp.position}</div>
-                                <div class="employee-stats">
-                                    <div class="stat">
-                                        <span class="stat-label">Rate:</span>
-                                        <span class="stat-value">${formatCurrency(emp.hourly_wage)}/hr</span>
-                                    </div>
-                                    <div class="stat">
-                                        <span class="stat-label">Hours:</span>
-                                        <span class="stat-value">${emp.hours_per_week} hrs/week</span>
-                                    </div>
-                                </div>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-
-                <div class="content-section metrics-section">
-                    <div class="metrics-grid">
-                        <div class="metric-card hours-card">
-                            <h6 class="section-title">Hours</h6>
-                            <div class="metric-content">
-                                <div class="metric-row">
-                                    <span class="metric-label">Weekly Hours:</span>
-                                    <span class="metric-value">${weeklyHours} hrs</span>
-                                </div>
-                                <div class="metric-row">
-                                    <span class="metric-label">Monthly Billable:</span>
-                                    <span class="metric-value">${monthlyBillableHours.toFixed(1)} hrs</span>
-                                </div>
-                                <div class="metric-row">
-                                    <span class="metric-label">Efficiency Rate:</span>
-                                    <span class="metric-value">${(efficiencyRate * 100).toFixed(0)}%</span>
-                                </div>
-                            </div>
+        return `
+            <div class="truck-profile">
+                <div class="truck-header">
+                    <div class="truck-title">
+                        <h4>${truck.name}</h4>
+                        <div class="truck-subtitle">
+                            <span class="model-badge">${truck.make} ${truck.model} ${truck.year}</span>
+                            <span class="plate-badge">${truck.license_plate || ''}</span>
+                            <span class="area-badge">${truck.service_area || 'Not specified'}</span>
                         </div>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="btn btn-sm btn-outline-primary" onclick="editTruck('${truck.truck_id}')">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger" onclick="deleteTruck('${truck.truck_id}')">
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
+                    </div>
+                </div>
 
-                        <div class="metric-card expenses-card">
-                            <h6 class="section-title">Monthly Expenses</h6>
-                            <div class="metric-content">
-                                <div class="expense-grid">
-                                    <div class="expense-column">
-                                        <div class="metric-row">
-                                            <span class="metric-label">Crew Wages:</span>
-                                            <span class="metric-value">${formatCurrency(crewWages)}</span>
+                <div class="truck-content">
+                    <div class="content-section team-section">
+                        <h6 class="section-title">Team Members</h6>
+                        <div class="team-grid">
+                            ${truck.employees && truck.employees.length > 0 ? truck.employees.map(emp => `
+                                <div class="employee-card">
+                                    <div class="employee-name">${emp.name || 'Unknown'}</div>
+                                    <div class="employee-position">${emp.position || 'No position'}</div>
+                                    <div class="employee-stats">
+                                        <div class="stat">
+                                            <span class="stat-label">Rate:</span>
+                                            <span class="stat-value">${formatCurrency(parseFloat(emp.hourly_wage || 0))}/hr</span>
                                         </div>
-                                        ${truck.loan_payment > 0 ? `
-                                            <div class="metric-row">
-                                                <span class="metric-label">Loan/Lease:</span>
-                                                <span class="metric-value">${formatCurrency(truck.loan_payment)}</span>
-                                            </div>
-                                        ` : ''}
-                                        ${truck.insurance > 0 ? `
-                                            <div class="metric-row">
-                                                <span class="metric-label">Insurance:</span>
-                                                <span class="metric-value">${formatCurrency(truck.insurance)}</span>
-                                            </div>
-                                        ` : ''}
-                                    </div>
-                                    <div class="expense-column">
-                                        ${truck.fuel_budget > 0 ? `
-                                            <div class="metric-row">
-                                                <span class="metric-label">Fuel:</span>
-                                                <span class="metric-value">${formatCurrency(truck.fuel_budget)}</span>
-                                            </div>
-                                        ` : ''}
-                                        ${truck.maintenance_budget > 0 ? `
-                                            <div class="metric-row">
-                                                <span class="metric-label">Maintenance:</span>
-                                                <span class="metric-value">${formatCurrency(truck.maintenance_budget)}</span>
-                                            </div>
-                                        ` : ''}
-                                        ${truck.other_expenses > 0 ? `
-                                            <div class="metric-row">
-                                                <span class="metric-label">Other:</span>
-                                                <span class="metric-value">${formatCurrency(truck.other_expenses)}</span>
-                                            </div>
-                                        ` : ''}
+                                        <div class="stat">
+                                            <span class="stat-label">Hours:</span>
+                                            <span class="stat-value">${parseFloat(emp.hours_per_week || 0)}/week</span>
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="expense-totals">
-                                    <div class="metric-row subtotal">
-                                        <span class="metric-label">Vehicle Total:</span>
-                                        <span class="metric-value">${formatCurrency(truckExpenses)}</span>
+                            `).join('') : '<div class="no-employees">No team members assigned</div>'}
+                        </div>
+                    </div>
+
+                    <div class="content-section expenses-section">
+                        <h6 class="section-title">Monthly Expenses</h6>
+                        <div class="expenses-info">
+                            <div class="expense-item">
+                                <span>Loan Payment</span>
+                                <span>${formatCurrency(truck.loan_payment)}</span>
+                            </div>
+                            <div class="expense-item">
+                                <span>Insurance</span>
+                                <span>${formatCurrency(truck.insurance)}</span>
+                            </div>
+                            <div class="expense-item">
+                                <span>Fuel Budget</span>
+                                <span>${formatCurrency(truck.fuel_budget)}</span>
+                            </div>
+                            <div class="expense-item">
+                                <span>Maintenance Budget</span>
+                                <span>${formatCurrency(truck.maintenance_budget)}</span>
+                            </div>
+                            <div class="expense-item">
+                                <span>Other Expenses</span>
+                                <span>${formatCurrency(truck.other_expenses)}</span>
+                            </div>
+                            <div class="expense-subtotal">
+                                <span>Fixed Expenses</span>
+                                <span>${formatCurrency(
+                                    parseFloat(truck.loan_payment || 0) +
+                                    parseFloat(truck.insurance || 0) +
+                                    parseFloat(truck.fuel_budget || 0) +
+                                    parseFloat(truck.maintenance_budget || 0) +
+                                    parseFloat(truck.other_expenses || 0)
+                                )}</span>
+                            </div>
+                            <div class="expense-subtotal">
+                                <span>Team Wages</span>
+                                <span>${formatCurrency(truck.employees ? truck.employees.reduce((total, emp) => 
+                                    total + (parseFloat(emp.hourly_wage || 0) * parseFloat(emp.hours_per_week || 0) * 4), 0) : 0
+                                )}</span>
+                            </div>
+                            <div class="expense-total">
+                                <span>Total Monthly Expenses</span>
+                                <span>${formatCurrency(monthlyExpenses)}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="content-section metrics-section">
+                        <h6 class="section-title">Monthly Performance</h6>
+                        <div class="metrics-grid">
+                            <div class="metric-card">
+                                <h6 class="metric-subtitle">Hours & Efficiency</h6>
+                                <div class="metric-content">
+                                    <div class="metric-row">
+                                        <span class="metric-label">Weekly Hours</span>
+                                        <span class="metric-value">${formatNumber(truck.effective_hours || 
+                                            (truck.employees ? truck.employees.reduce((total, emp) => 
+                                                total + parseFloat(emp.hours_per_week || 0), 0) : 0))}</span>
                                     </div>
-                                    <div class="metric-row total">
-                                        <span class="metric-label">Total Monthly:</span>
-                                        <span class="metric-value">${formatCurrency(totalMonthlyExpenses)}</span>
+                                    <div class="metric-row">
+                                        <span class="metric-label">Monthly Hours</span>
+                                        <span class="metric-value">${formatNumber((truck.effective_hours || 
+                                            (truck.employees ? truck.employees.reduce((total, emp) => 
+                                                total + parseFloat(emp.hours_per_week || 0), 0) : 0)) * 4)}</span>
+                                    </div>
+                                    <div class="metric-row">
+                                        <span class="metric-label">Billable Hours</span>
+                                        <span class="metric-value">${formatNumber((truck.effective_hours || 
+                                            (truck.employees ? truck.employees.reduce((total, emp) => 
+                                                total + parseFloat(emp.hours_per_week || 0), 0) : 0)) * 4 * efficiencyRate)}</span>
                                     </div>
                                 </div>
                             </div>
-                        </div>
 
-                        <div class="metric-card revenue-card">
-                            <h6 class="section-title">Financial Metrics</h6>
-                            <div class="metric-content">
-                                <div class="revenue-section">
+                            <div class="metric-card">
+                                <h6 class="metric-subtitle">Monthly Expenses</h6>
+                                <div class="metric-content">
                                     <div class="metric-row">
-                                        <span class="metric-label">Hourly Rate:</span>
-                                        <span class="metric-value">${formatCurrency(hourlyRate)}/hr</span>
+                                        <span class="metric-label">Fixed Expenses</span>
+                                        <span class="metric-value">${formatCurrency(
+                                            parseFloat(truck.loan_payment || 0) +
+                                            parseFloat(truck.insurance || 0) +
+                                            parseFloat(truck.fuel_budget || 0) +
+                                            parseFloat(truck.maintenance_budget || 0) +
+                                            parseFloat(truck.other_expenses || 0)
+                                        )}</span>
+                                    </div>
+                                    ${truck.employees && truck.employees.length > 0 ? truck.employees.map(emp => `
+                                        <div class="metric-row employee-wage">
+                                            <span class="metric-label">${emp.name} (${emp.position})</span>
+                                            <span class="metric-value">${formatCurrency(parseFloat(emp.hourly_wage || 0) * parseFloat(emp.hours_per_week || 0) * 4)}</span>
+                                        </div>
+                                    `).join('') : ''}
+                                    <div class="metric-row total-wages">
+                                        <span class="metric-label">Total Wages</span>
+                                        <span class="metric-value">${formatCurrency(truck.employees ? truck.employees.reduce((total, emp) => 
+                                            total + (parseFloat(emp.hourly_wage || 0) * parseFloat(emp.hours_per_week || 0) * 4), 0) : 0
+                                        )}</span>
+                                    </div>
+                                    <div class="metric-row total-expenses">
+                                        <span class="metric-label">Total Expenses</span>
+                                        <span class="metric-value">${formatCurrency(monthlyExpenses)}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="metric-card">
+                                <h6 class="metric-subtitle">Revenue & Profit</h6>
+                                <div class="metric-content">
+                                    <div class="metric-row">
+                                        <span class="metric-label">Revenue</span>
+                                        <span class="metric-value revenue">${formatCurrency(monthlyRevenue)}</span>
                                     </div>
                                     <div class="metric-row">
-                                        <span class="metric-label">Monthly Revenue:</span>
-                                        <span class="metric-value revenue">${formatCurrency(revenue)}</span>
+                                        <span class="metric-label">Expenses</span>
+                                        <span class="metric-value">${formatCurrency(monthlyExpenses)}</span>
                                     </div>
                                     <div class="metric-row">
-                                        <span class="metric-label">Monthly Profit:</span>
-                                        <span class="metric-value ${profit >= 0 ? 'profit' : 'loss'}">${formatCurrency(profit)}</span>
+                                        <span class="metric-label">Profit</span>
+                                        <span class="metric-value ${monthlyProfit >= 0 ? 'profit' : 'loss'}">${formatCurrency(monthlyProfit)}</span>
                                     </div>
                                     <div class="metric-row">
-                                        <span class="metric-label">Profit Margin:</span>
-                                        <span class="metric-value ${profit >= 0 ? 'profit' : 'loss'}">${profitMargin.toFixed(1)}%</span>
+                                        <span class="metric-label">Margin</span>
+                                        <span class="metric-value ${monthlyProfit >= 0 ? 'profit' : 'loss'}">${profitMargin.toFixed(1)}%</span>
                                     </div>
                                 </div>
                             </div>
@@ -953,16 +1041,7 @@ function renderTrucks(efficiencyRate, hourlyRate) {
                 </div>
             </div>
         `;
-        tableBody.appendChild(truckElement);
-    });
-}
-
-function calculateTotalTruckExpenses(truck) {
-    return (parseFloat(truck.loan_payment) || 0) +
-           (parseFloat(truck.insurance) || 0) +
-           (parseFloat(truck.fuel_budget) || 0) +
-           (parseFloat(truck.maintenance_budget) || 0) +
-           (parseFloat(truck.other_expenses) || 0);
+    }).join('');
 }
 
 function showAddTruckModal() {
@@ -977,7 +1056,13 @@ function showAddTruckModal() {
 function editTruck(truckId) {
     fetch(`/get_truck/${truckId}`)
         .then(response => response.json())
-        .then(truck => {
+        .then(data => {
+            if (!data.success) {
+                showNotification('Failed to load truck data', 'error');
+                return;
+            }
+            
+            const truck = data.truck;
             const modal = document.getElementById('truckModal');
             modal.querySelector('.modal-title').textContent = 'Edit Truck';
             
@@ -1000,11 +1085,15 @@ function editTruck(truckId) {
             const employeeSelect = document.getElementById('truckEmployees');
             if (employeeSelect) {
                 Array.from(employeeSelect.options).forEach(option => {
-                    option.selected = truck.employee_ids.includes(option.value);
+                    option.selected = (truck.employee_ids || []).includes(option.value);
                 });
             }
             
             new bootstrap.Modal(modal).show();
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showNotification('Failed to load truck data: ' + error.message, 'error');
         });
 }
 
@@ -1017,10 +1106,14 @@ function deleteTruck(truckId) {
         .then(data => {
             if (data.success) {
                 loadTrucks();
-                showNotification('Truck deleted');
+                showNotification('Truck deleted successfully');
             } else {
-                showNotification('Failed to delete truck', 'error');
+                showNotification('Failed to delete truck: ' + (data.error || 'Unknown error'), 'error');
             }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showNotification('Failed to delete truck: ' + error.message, 'error');
         });
     }
 }
@@ -1060,17 +1153,12 @@ document.addEventListener('DOMContentLoaded', function() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data)
         })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            return response.json();
-        })
+        .then(response => response.json())
         .then(data => {
             if (data.success) {
                 bootstrap.Modal.getInstance(document.getElementById('truckModal')).hide();
                 loadTrucks();
-                showNotification(`Truck ${isEdit ? 'updated' : 'added'}`);
+                showNotification(`Truck ${isEdit ? 'updated' : 'added'} successfully`);
             } else {
                 showNotification(data.error || 'Failed to save truck', 'error');
             }
